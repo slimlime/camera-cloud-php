@@ -7,7 +7,7 @@ import { ActionSheetController, Loading, LoadingController, NavController, Platf
 
 declare var cordova;
 
-export const SERVER_URL = "http://192.168.0.24:80";
+export const SERVER_URL = "http://192.168.0.2:80";
 
 /**
  *
@@ -153,7 +153,8 @@ export class HomePage {
     // Use the FileTransfer to upload the image
     fileTransfer.upload(targetPath, url, options).then(data => {
       this.loading.dismissAll()
-      this.presentToast('Image successful uploaded.');
+      this.presentToast('Image successfully uploaded.');
+      console.log("Image uploaded", data);
     }, err => {
       this.loading.dismissAll()
       this.presentToast('Error while uploading file.');

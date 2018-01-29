@@ -7,3 +7,5 @@ ionic cordova plugin add cordova-plugin-camera --save
 ionic cordova plugin add cordova-plugin-file --save
 ionic cordova plugin add cordova-plugin-file-transfer --save
 ionic cordova plugin add cordova-plugin-filepath --save
+
+xampp/htdocs/*.php files
