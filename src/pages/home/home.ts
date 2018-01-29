@@ -148,7 +148,7 @@ export class HomePage {
     this.loading = this.loadingCtrl.create({
       content: 'Uploading...',
     });
-    // this.loading.present();
+    this.loading.present();
 
     // Use the FileTransfer to upload the image
     fileTransfer.upload(targetPath, url, options).then(data => {
