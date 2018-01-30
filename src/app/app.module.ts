@@ -6,6 +6,8 @@ import { FilePath } from '@ionic-native/file-path';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
 import { Transfer } from '@ionic-native/transfer';
+import { FileTransfer } from '@ionic-native/file-transfer';
+
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 
 import { AboutPage } from '../pages/about/about';
@@ -39,6 +41,7 @@ import { MyApp } from './app.component';
     StatusBar,
     SplashScreen,
 
+    FileTransfer, 
     File,
     Transfer,
     Camera,

@@ -9,3 +9,5 @@ ionic cordova plugin add cordova-plugin-file-transfer --save
 ionic cordova plugin add cordova-plugin-filepath --save
 
 xampp/htdocs/*.php files
+
+backup plugins setup

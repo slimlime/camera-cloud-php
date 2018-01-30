@@ -4,10 +4,11 @@ import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { Transfer, TransferObject } from '@ionic-native/transfer';
 import { ActionSheetController, Loading, LoadingController, NavController, Platform, ToastController } from 'ionic-angular';
+import { FileTransferObject, FileTransfer } from '@ionic-native/file-transfer';
 
 declare var cordova;
 
-export const SERVER_URL = "http://192.168.0.2:80";
+export const SERVER_URL = "http://192.168.0.2/upload.php";
 
 /**
  *
@@ -29,7 +30,10 @@ export class HomePage {
     public actionSheetCtrl: ActionSheetController,
     public toastCtrl: ToastController,
     public platform: Platform,
-    public loadingCtrl: LoadingController) {
+    public loadingCtrl: LoadingController, 
+    public fileTransfer: FileTransfer
+  
+  ) {
 
 
   }
@@ -67,7 +71,7 @@ export class HomePage {
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true,
-      // httpMethod: POST
+      destinationType: this.camera.DestinationType.FILE_URI
     };
 
     // Get the data of an image
@@ -140,10 +144,12 @@ export class HomePage {
       fileName: filename,
       chunkedMode: false,
       mimeType: "multipart/form-data",
-      params: { 'fileName': filename }
+      params: { 'fileName': filename },
+      httpMethod: 'POST'
+
     };
 
-    const fileTransfer: TransferObject = this.transfer.create();
+    const fileTransfer: FileTransferObject = this.fileTransfer.create();
 
     this.loading = this.loadingCtrl.create({
       content: 'Uploading...',
@@ -151,14 +157,17 @@ export class HomePage {
     this.loading.present();
 
     // Use the FileTransfer to upload the image
-    fileTransfer.upload(targetPath, url, options).then(data => {
-      this.loading.dismissAll()
-      this.presentToast('Image successfully uploaded.');
-      console.log("Image uploaded", data);
-    }, err => {
-      this.loading.dismissAll()
-      this.presentToast('Error while uploading file.');
-    });
+    fileTransfer.upload(targetPath, url, options)
+      .then(data => {
+        this.loading.dismissAll()
+        this.presentToast('Image successfully uploaded.');
+        console.log("Image uploaded", data);
+
+      }, err => {
+        this.loading.dismissAll()
+        this.presentToast('Error while uploading file.');
+        console.log("Upload error", err);
+      });
   }
 
 
