@@ -10,7 +10,19 @@ declare const cordova;
 
 export const SERVER_URL = "http://192.168.0.2/";
 export const PHOTO_UPLOAD_URL = SERVER_URL + "upload.php";
-export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";
+export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve of photo files.
+
+/* - TODO: Replace inefficient web calls with a library or proper database..
+ * Use of .json just for practice and able to store in local file.json / compatibility.
+ */
+
+//  Could probably have separate class to represent photo data behaviour, but so many useful utility 
+// functions can be used regardless.
+ export interface MyPhoto {
+  
+ 
+
+ }
 
 
 /**
@@ -27,15 +39,14 @@ export class HomePage {
   lastImage: string = null;
   loading: Loading;
 
-  constructor(public navCtrl: NavController,
-    public camera: Camera, public transfer: Transfer,
+  constructor( public navCtrl: NavController,
+    public camera: Camera,
     public file: File, public filePath: FilePath,
     public actionSheetCtrl: ActionSheetController,
     public toastCtrl: ToastController,
     public platform: Platform,
     public loadingCtrl: LoadingController, 
-    public fileTransfer: FileTransfer
-  
+    public transfer: Transfer, public fileTransfer: FileTransfer
   ) {
 
 
