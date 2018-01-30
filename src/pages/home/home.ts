@@ -1,14 +1,17 @@
 import { Component } from '@angular/core';
-import { Camera } from '@ionic-native/camera';
+import { Camera, CameraOptions } from '@ionic-native/camera';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
-import { Transfer, TransferObject } from '@ionic-native/transfer';
-import { ActionSheetController, Loading, LoadingController, NavController, Platform, ToastController } from 'ionic-angular';
+import { Transfer, TransferObject, FileUploadOptions } from '@ionic-native/transfer';
+import { ActionSheetController, Loading, LoadingController, NavController, Platform, ToastController, ActionSheetOptions } from 'ionic-angular';
 import { FileTransferObject, FileTransfer } from '@ionic-native/file-transfer';
 
-declare var cordova;
+declare const cordova;
 
-export const SERVER_URL = "http://192.168.0.2/upload.php";
+export const SERVER_URL = "http://192.168.0.2/";
+export const PHOTO_UPLOAD_URL = SERVER_URL + "upload.php";
+export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";
+
 
 /**
  *
@@ -38,8 +41,9 @@ export class HomePage {
 
   }
 
+  // inefficient recreating options each time.
   public presentActionSheet() {
-    let actionSheet = this.actionSheetCtrl.create({
+    const actionSheetOptions: ActionSheetOptions = {
       title: 'Select Image Source',
       buttons: [
         {
@@ -59,19 +63,31 @@ export class HomePage {
           role: 'cancel'
         }
       ]
-    });
+    }
+    const actionSheet = this.actionSheetCtrl.create(actionSheetOptions);
     actionSheet.present();
   }
 
-
-  public takePicture(sourceType) {
+/**
+ * sourcetype camera photolibrary savephotoalbum.
+ * 
+ * @param {any} sourceType 
+ * @memberof HomePage
+ */
+public takePicture(sourceType) {
     // Create options for the Camera Dialog
-    var options = {
+    const options: CameraOptions = {
       quality: 100,
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true,
-      destinationType: this.camera.DestinationType.FILE_URI
+      destinationType: this.camera.DestinationType.FILE_URI,   // image as base64 or file uri
+      allowEdit: false,
+
+      // - TEST Keep image manageable size for testing. no 20 megabyte uploads, please.
+      targetWidth: 400,
+      targetHeight: 600,
+      
     };
 
     // Get the data of an image
@@ -80,13 +96,13 @@ export class HomePage {
       if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
         this.filePath.resolveNativePath(imagePath)
           .then(filePath => {
-            let correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
-            let currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
+            const correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
+            const currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
             this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
           });
       } else {
-        var currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-        var correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
+        const currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
+        const correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
         this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
       }
     }, (err) => {
@@ -96,7 +112,7 @@ export class HomePage {
 
   // Create a new name for the image
   private createFileName() {
-    var d = new Date(),
+    const d = new Date(),
       n = d.getTime(),
       newFileName = n + ".jpg";
     return newFileName;
@@ -112,7 +128,7 @@ export class HomePage {
   }
 
   private presentToast(text) {
-    let toast = this.toastCtrl.create({
+    const toast = this.toastCtrl.create({
       message: text,
       duration: 3000,
       position: 'top'
@@ -131,15 +147,15 @@ export class HomePage {
 
   public uploadImage() {
     // Destination URL
-    var url = SERVER_URL;
+    const url = PHOTO_UPLOAD_URL;
 
     // File for Upload
-    var targetPath = this.pathForImage(this.lastImage);
+    const targetPath = this.pathForImage(this.lastImage);
 
     // File name only
-    var filename = this.lastImage;
+    const filename = this.lastImage;
 
-    var options = {
+    const options: FileUploadOptions = {
       fileKey: "file",
       fileName: filename,
       chunkedMode: false,
