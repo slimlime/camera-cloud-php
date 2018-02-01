@@ -2,9 +2,20 @@ import { Component } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
-import { Transfer, TransferObject, FileUploadOptions } from '@ionic-native/transfer';
-import { ActionSheetController, Loading, LoadingController, NavController, Platform, ToastController, ActionSheetOptions } from 'ionic-angular';
-import { FileTransferObject, FileTransfer } from '@ionic-native/file-transfer';
+import { FileTransfer } from '@ionic-native/file-transfer';
+import { Transfer } from '@ionic-native/transfer';
+import {
+  ActionSheet,
+  ActionSheetButton,
+  ActionSheetController,
+  ActionSheetOptions,
+  Loading,
+  LoadingController,
+  NavController,
+  Platform,
+  Toast,
+  ToastController,
+} from 'ionic-angular';
 
 declare const cordova;
 
@@ -16,13 +27,25 @@ export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve
  * Use of .json just for practice and able to store in local file.json / compatibility.
  */
 
-//  Could probably have separate class to represent photo data behaviour, but so many useful utility 
+//  Could probably have separate class to represent photo data behaviour, but so many useful utility
 // functions can be used regardless.
- export interface MyPhoto {
-  
- 
+/**
+ * @param id? a
+ * @param title
+ * @param description?
+ * @param photo?
+ * @param timestampCreated
+ *
+ * @interface PhotoPost
+ */
+interface PhotoPost {
+  id?,
+  title: string,
+  description?: string,
+  photo?: any            // test URI or base64 for icon and then expand to full image
+  timestampCreated: Date,
+}
 
- }
 
 
 /**
@@ -36,119 +59,155 @@ export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve
   templateUrl: 'home.html'
 })
 export class HomePage {
-  lastImage: string = null;
+  lastImage: string = null; // - FIXME: MyPhoto
   loading: Loading;
-
-  constructor( public navCtrl: NavController,
+  cameraActionSheet: ActionSheet
+  constructor(public navCtrl: NavController,
     public camera: Camera,
     public file: File, public filePath: FilePath,
     public actionSheetCtrl: ActionSheetController,
     public toastCtrl: ToastController,
     public platform: Platform,
-    public loadingCtrl: LoadingController, 
+    public loadingCtrl: LoadingController,
     public transfer: Transfer, public fileTransfer: FileTransfer
   ) {
+    //
 
-
+    this.presentToast("Hello");
+    this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
   }
 
-  // inefficient recreating options each time.
-  public presentActionSheet() {
-    const actionSheetOptions: ActionSheetOptions = {
-      title: 'Select Image Source',
+  ionViewDidLoad() {
+    //
+    this.presentToast("IonViewDIdLoad");
+    this.platform.ready()
+      .then(platformReadySource => {
+        console.log("READY");
+        this.debugTestLogToastToastToast("READY");
+      }, error => {
+        this.debugTestLogToastToastToast("PLATFORM READY ERROR" + error.toString());
+      });
+
+  }
+  /**
+   *
+   *
+   * @param {Camera} camera
+   * @returns {ActionSheetOptions}
+   * @memberof HomePage
+   */
+  getCameraSheetOptions(camera: Camera): ActionSheetOptions {
+    this.presentToast("Hell1o");
+
+    // Picture button set up for Camera. test.
+    const getPictureButton = (buttonText, sourceType) => {
+      const button = {
+        text: buttonText,
+        handler: () => { this.takePicture(sourceType) }
+      };
+      return button;
+    }
+
+    const photoLibraryButton: ActionSheetButton = getPictureButton("Load photo from the device library", camera.PictureSourceType.PHOTOLIBRARY);
+    const photoCameraButton: ActionSheetButton = getPictureButton("Capture a photo from the camera", camera.PictureSourceType.CAMERA)
+    const cancelButton: ActionSheetButton = {
+      text: "Cancel",
+      role: "cancel"
+    }
+
+    const camActionSheetOptions: ActionSheetOptions = {
+      title: "Select image  source",
       buttons: [
-        {
-          text: 'Load from Library',
-          handler: () => {
-            this.takePicture(this.camera.PictureSourceType.PHOTOLIBRARY);
-          }
-        },
-        {
-          text: 'Use Camera',
-          handler: () => {
-            this.takePicture(this.camera.PictureSourceType.CAMERA);
-          }
-        },
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        }
+        photoLibraryButton,
+        photoCameraButton,
+        cancelButton
       ]
     }
-    const actionSheet = this.actionSheetCtrl.create(actionSheetOptions);
-    actionSheet.present();
+
+    return camActionSheetOptions;
   }
 
-/**
- * sourcetype camera photolibrary savephotoalbum.
- * 
- * @param {any} sourceType 
- * @memberof HomePage
- */
-public takePicture(sourceType) {
-    // Create options for the Camera Dialog
-    const options: CameraOptions = {
-      quality: 100,
+  /**
+   *
+   *
+   * @param {Camera} camera
+   * @returns {ActionSheet}
+   * @memberof HomePage
+   */
+  prepareCameraActionSheet( camera: Camera, actionSheetCtrl: ActionSheetController) {
+    this.presentToast("Hello2");
+
+    this.debugTestLogToastToastToast("opt");
+    const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
+    this.debugTestLogToastToastToast("create");
+    const camActionSheet: ActionSheet = this.actionSheetCtrl.create(camActionSheetOptions);
+
+    // modifies the page's actionsheet; // impure function
+    // prepares the page actionsheet.
+    this.cameraActionSheet = camActionSheet;
+
+    return camActionSheet;
+  }
+
+  //   export interface ActionSheetOptions {
+  //     title?: string;
+  //     subTitle?: string;
+  //     cssClass?: string;
+  //     buttons?: (ActionSheetButton | string)[];
+  //     enableBackdropDismiss?: boolean;
+  // }
+  // export interface ActionSheetButton {
+  //     text?: string;
+  //     role?: string;
+  //     icon?: string;
+  //     cssClass?: string;
+  //     handler?: () => boolean | void;
+  // }
+
+  takePicture(sourceType) {
+    const camOptions: CameraOptions = {
+      quality: 98,
       sourceType: sourceType,
       saveToPhotoAlbum: false,
       correctOrientation: true,
-      destinationType: this.camera.DestinationType.FILE_URI,   // image as base64 or file uri
+      destinationType: this.camera.DestinationType.FILE_URI,
       allowEdit: false,
 
-      // - TEST Keep image manageable size for testing. no 20 megabyte uploads, please.
+      // Make images more manageable for testing. ~file size~dimensions~.
       targetWidth: 400,
-      targetHeight: 600,
-      
-    };
+      targetHeight: 600
+    }
 
-    // Get the data of an image
-    this.camera.getPicture(options).then((imagePath) => {
-      // Special handling for Android library
-      if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
-        this.filePath.resolveNativePath(imagePath)
-          .then(filePath => {
-            const correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
-            const currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
-            this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
-          });
-      } else {
-        const currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-        const correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
-        this.copyFileToLocalDir(correctPath, currentName, this.createFileName());
-      }
-    }, (err) => {
-      this.presentToast('Error while selecting image.');
-    });
+    this.camera.getPicture(camOptions)
+      .then((imageFilePathURI) => {
+        this.debugTestLogToastToastToast(imageFilePathURI);
+        this.filePath.resolveNativePath(imageFilePathURI)
+      }, (err) => {
+
+      });
+
   }
 
-  // Create a new name for the image
-  private createFileName() {
-    const d = new Date(),
-      n = d.getTime(),
-      newFileName = n + ".jpg";
-    return newFileName;
+  debugTestLogToastToastToast(string: string) {
+    console.log("dtlttt::", string);
+    this.presentToast(string);
   }
-
-  // Copy the image to a local folder
-  private copyFileToLocalDir(sourceFilePath, currentName, newFileName) {
-    this.file.copyFile(sourceFilePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
-      this.lastImage = newFileName;
-    }, error => {
-      this.presentToast('Error while storing file.');
-    });
-  }
-
-  private presentToast(text) {
-    const toast = this.toastCtrl.create({
+  presentToast(text) {
+    const toast: Toast = this.toastCtrl.create({
       message: text,
-      duration: 3000,
-      position: 'top'
+      duration: 2500,
+      position: "top"
     });
     toast.present();
   }
 
-  // Always get the accurate path to your apps folder
-  public pathForImage(img) {
+
+  presentActionSheet() {
+    this.cameraActionSheet.present();
+  }
+
+
+  pathForImage(img) {
     if (img === null) {
       return '';
     } else {
@@ -156,49 +215,6 @@ public takePicture(sourceType) {
     }
   }
 
-  public uploadImage() {
-    // Destination URL
-    const url = PHOTO_UPLOAD_URL;
-
-    // File for Upload
-    const targetPath = this.pathForImage(this.lastImage);
-
-    // File name only
-    const filename = this.lastImage;
-
-    const options: FileUploadOptions = {
-      fileKey: "file",
-      fileName: filename,
-      chunkedMode: false,
-      mimeType: "multipart/form-data",
-      params: { 'fileName': filename },
-      httpMethod: 'POST'
-
-    };
-
-    const fileTransfer: FileTransferObject = this.fileTransfer.create();
-
-    this.loading = this.loadingCtrl.create({
-      content: 'Uploading...',
-    });
-    this.loading.present();
-
-    // Use the FileTransfer to upload the image
-    fileTransfer.upload(targetPath, url, options)
-      .then(data => {
-        this.loading.dismissAll()
-        this.presentToast('Image successfully uploaded.');
-        console.log("Image uploaded", data);
-
-      }, err => {
-        this.loading.dismissAll()
-        this.presentToast('Error while uploading file.');
-        console.log("Upload error", err);
-      });
-  }
-
-
 }
-
 
 
