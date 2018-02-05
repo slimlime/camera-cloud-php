@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera';
-import { File } from '@ionic-native/file';
+import { Entry, File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { Transfer } from '@ionic-native/transfer';
@@ -25,6 +25,7 @@ import {
   PhotoServerHandlerProvider,
 } from './../../providers/photo-server-handler/photo-server-handler';
 
+declare const cordova;
 
 /* - TODO: Replace inefficient web calls with a library or proper database..
  * Use of .json just for practice and able to store in local file.json / compatibility.
@@ -169,14 +170,48 @@ export class HomePage {
     this.camera.getPicture(camOptions)
       .then((imageFilePathURI) => {
         this.debugTestLogToastToastToast(imageFilePathURI);
-        const nativePathProm: Promise<string> = this.filePath.resolveNativePath(imageFilePathURI);
 
-        nativePathProm.then((nativePath: string) => {
-          this.debugTestLogToastToastToast(nativePath);
-        });
+        // For Android-specific resolution of PHOTOLIBRARY file paths.
+        const isSpecialAndroidPhotoLibraryPathFlag = this.platform.is('android') &&
+          sourceType === this.camera.PictureSourceType.PHOTOLIBRARY;
+
+        // - TODO: Refactor~ separate functinos, let etc. promise chain. for filename var init.
+        if (isSpecialAndroidPhotoLibraryPathFlag) {
+          const imageNativePathProm: Promise<string> = this.filePath.resolveNativePath(imageFilePathURI);
+
+          imageNativePathProm
+            .then((imageNativePath: string) => {
+              const correctPath = imageFilePathURI.substr(0, imageNativePath.lastIndexOf('/') + 1);
+              const currentName = imageFilePathURI.substring(imageNativePath.lastIndexOf('/') + 1, imageNativePath.lastIndexOf('?'));
+
+
+                const randoTSFilename = new Date().getTime() + ".jpg";
+                this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
+
+                this.debugTestLogToastToastToast("takePicture:: imageURI, native path, correctPath, currName, platFlag " +
+                imageFilePathURI + " " + imageNativePath + " " + correctPath + " " + currentName + " " +
+                isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
+
+            });
+        } else {
+
+          const correctPath = imageFilePathURI.substr(imageFilePathURI.lastIndexOf('/') + 1);
+          const currentName = imageFilePathURI.substr(0, imageFilePathURI.lastIndexOf('/') + 1);
+
+          const randoTSFilename = new Date().getTime() + ".jpg";
+          this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
+
+          this.debugTestLogToastToastToast("takePicture:: imageURI, correctPath, currName, platFlag " +
+            imageFilePathURI + " " + correctPath + " " + currentName + " " +
+            isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
+        }
+
+
+
+
 
       }, (err) => {
-
+        this.debugTestLogToastToastToast("Error whil selecting image");
       });
   }
 
@@ -190,6 +225,21 @@ export class HomePage {
   }
 
 
+  // should get the filename and timestamp from the created photo post already. - FIXME:
+  copyFileToLocalDir(sourceFilePath: string, currentName: string, newFileName: string) {
+    const fileEntryProm: Promise<Entry> = this.file.copyFile(sourceFilePath, currentName,
+      cordova.file.dataDirectory, newFileName);
+      this.debugTestLogToastToastToast("copyFileToLocalDir::" + sourceFilePath + currentName + newFileName);
+    fileEntryProm
+      .then( (success: Entry) => {
+        const timestampDate: Date = new Date(); // milliseconds timestamp.
+        this.currentPhotoPost = new Phost("TestTitle", "testDescriptionss s", timestampDate);
+      }, error => {
+        this.debugTestLogToastToastToast("Error while storing file to local directory.");
+        console.log(error);
+      }
+    );
+  }
 
   // click() function
   uploadImage() {
@@ -241,7 +291,7 @@ export class HomePage {
       return "";            // used in view as img src.
     } else {
       const imageDataPath = this.currentPhotoPost.getLocalFilePath();
-      this.debugTestLogToastToastToast(imageDataPath);
+      this.debugTestLogToastToastToast("HP:: pathForImage::" + imageDataPath);
 
       return imageDataPath;
       // return cordova.file.dataDirectory + img;
