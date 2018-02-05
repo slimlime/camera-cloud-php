@@ -59,7 +59,7 @@ export class Phost {
 
   // Get platform-correct path to app data folder for `photos/` folder.
   getLocalFilePath(): string {
-    const nativeDataPhotosDirectory: string = cordova.file.dataDirectory + "photos/";
+    const nativeDataPhotosDirectory: string = cordova.file.dataDirectory;
     const filePath = nativeDataPhotosDirectory + this.file + ".jpg";
 
     return filePath;

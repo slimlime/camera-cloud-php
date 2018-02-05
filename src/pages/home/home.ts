@@ -185,10 +185,10 @@ export class HomePage {
               const currentName = imageFilePathURI.substring(imageNativePath.lastIndexOf('/') + 1, imageNativePath.lastIndexOf('?'));
 
 
-                const randoTSFilename = new Date().getTime() + ".jpg";
-                this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
+              const randoTSFilename = new Date().getTime() + ".jpg";
+              this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
 
-                this.debugTestLogToastToastToast("takePicture:: imageURI, native path, correctPath, currName, platFlag " +
+              this.debugTestLogToastToastToast("takePicture:: imageURI, native path, correctPath, currName, platFlag " +
                 imageFilePathURI + " " + imageNativePath + " " + correctPath + " " + currentName + " " +
                 isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
 
@@ -211,7 +211,7 @@ export class HomePage {
 
 
       }, (err) => {
-        this.debugTestLogToastToastToast("Error whil selecting image");
+        this.debugTestLogToastToastToast("Error while selecting image");
       });
   }
 
@@ -227,18 +227,17 @@ export class HomePage {
 
   // should get the filename and timestamp from the created photo post already. - FIXME:
   copyFileToLocalDir(sourceFilePath: string, currentName: string, newFileName: string) {
-    const fileEntryProm: Promise<Entry> = this.file.copyFile(sourceFilePath, currentName,
+    const fileEntryProm = this.file.copyFile(sourceFilePath, currentName,
       cordova.file.dataDirectory, newFileName);
-      this.debugTestLogToastToastToast("copyFileToLocalDir::" + sourceFilePath + currentName + newFileName);
+    this.debugTestLogToastToastToast("copyFileToLocalDir:: source " + sourceFilePath + " curr: " + currentName + " new: " + newFileName);
     fileEntryProm
-      .then( (success: Entry) => {
+      .then( success => {
         const timestampDate: Date = new Date(); // milliseconds timestamp.
         this.currentPhotoPost = new Phost("TestTitle", "testDescriptionss s", timestampDate);
       }, error => {
         this.debugTestLogToastToastToast("Error while storing file to local directory.");
         console.log(error);
-      }
-    );
+      });
   }
 
   // click() function
