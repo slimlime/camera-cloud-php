@@ -2,7 +2,7 @@ import { FileUploadOptions } from '@ionic-native/transfer';
 import { LoadingController, Loading } from 'ionic-angular';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { FileTransfer, FileTransferObject } from '@ionic-native/file-transfer';
+import { FileTransfer, FileTransferObject, FileUploadResult } from '@ionic-native/file-transfer';
 
 
 export const SERVER_URL = "http://192.168.0.2/";
@@ -84,7 +84,7 @@ export class PhotoServerHandlerProvider {
 
 
   // Simply uploads file path to destination php POST form.
-  uploadPicture(photo: Phost, photoUploadServerUrl: string) {
+  uploadPicture(photo: Phost, photoUploadServerUrl: string): Promise<FileUploadResult> {
 
     // Present activity/loading indicator popover.
     // Get FileUploadOptions
@@ -93,15 +93,15 @@ export class PhotoServerHandlerProvider {
 
     const fileTransfer = this.fileTransfer;
 
-
     const pictureFileName: string = photo.title + photo.timestampCreated;
     const pictureUploadOptions: FileUploadOptions = this.configurePictureFileUploadOptions(pictureFileName);
 
 
     const fileTransferer: FileTransferObject = fileTransfer.create();
     // Use fileTransferer to upload fileUrl to serverUrl with options.
-    fileTransferer.upload(photo.getLocalFilePath(), photoUploadServerUrl, pictureUploadOptions);
+    const fileUploadPromise: Promise<FileUploadResult> = fileTransferer.upload(photo.getLocalFilePath(), photoUploadServerUrl, pictureUploadOptions);
 
+    return fileUploadPromise; // resolve UI elements on fulfilment of promise in callee.
   }
 
 

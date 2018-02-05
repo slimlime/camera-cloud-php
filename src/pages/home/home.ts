@@ -1,9 +1,8 @@
-import { PHOTO_UPLOAD_URL, Phost, PhotoServerHandlerProvider } from './../../providers/photo-server-handler/photo-server-handler';
 import { Component } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
-import { FileTransfer, FileTransferObject, FileUploadOptions } from '@ionic-native/file-transfer';
+import { FileTransfer } from '@ionic-native/file-transfer';
 import { Transfer } from '@ionic-native/transfer';
 import {
   ActionSheet,
@@ -18,6 +17,13 @@ import {
   Toast,
   ToastController,
 } from 'ionic-angular';
+
+import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
+import {
+  Phost,
+  PHOTO_UPLOAD_URL,
+  PhotoServerHandlerProvider,
+} from './../../providers/photo-server-handler/photo-server-handler';
 
 
 /* - TODO: Replace inefficient web calls with a library or proper database..
@@ -50,6 +56,7 @@ export class HomePage {
     public actionSheetCtrl: ActionSheetController,
     public loadingCtrl: LoadingController,
     public toastCtrl: ToastController,
+    public dataLoader: DataLoaderProvider,
     public photoServerHandler: PhotoServerHandlerProvider
   ) {
     //
@@ -65,7 +72,6 @@ export class HomePage {
     this.debugTestLogToastToastToast("ionViewDidLoad::");
     this.platform.ready()
       .then(platformReadySource => {
-        console.log("READY");
         this.debugTestLogToastToastToast("READY");
       }, error => {
         this.debugTestLogToastToastToast("PLATFORM READY ERROR" + error.toString());
@@ -208,7 +214,7 @@ export class HomePage {
     const debugFlagIsEnabled: boolean = true;
 
     if (debugFlagIsEnabled) {
-      console.log("dtlttt::", string);
+      console.log("debugTestLogTTT::", string);
       this.presentToast(string);
     }
     return debugFlagIsEnabled;
@@ -230,11 +236,15 @@ export class HomePage {
   }
 
 
-  pathForImage(img) {
+  pathForImage(img: Phost) {
     if (img === null) {
-      return '';
+      return "";            // used in view as img src.
     } else {
-      return cordova.file.dataDirectory + img;
+      const imageDataPath = this.currentPhotoPost.getLocalFilePath();
+      this.debugTestLogToastToastToast(imageDataPath);
+
+      return imageDataPath;
+      // return cordova.file.dataDirectory + img;
     }
   }
 

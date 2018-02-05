@@ -27,6 +27,11 @@ interface User {
  *
  * @export
  * @class DataLoaderProvider
+/**
+ * For the basic user and photocollection .json
+ *
+ * @export
+ * @class DataLoaderProvider
  */
 @Injectable()
 export class DataLoaderProvider {

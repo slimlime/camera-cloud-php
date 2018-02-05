@@ -7,7 +7,7 @@
 </ion-header>
 
 <ion-content padding>
-  <img src="{{currentPhotoPost.getFilePath()}}" style="width: 100%" [hidden]="currentPhotoPost === null">
+  <img src="{{pathForImage(currentPhotoPost)}}" style="width: 100%" [hidden]="currentPhotoPost === null">
   <h3 [hidden]="currentPhotoPost !== null">Please Select Image!</h3>
 </ion-content>
 

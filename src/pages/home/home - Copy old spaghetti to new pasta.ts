@@ -174,7 +174,6 @@ export class HomePage {
       mimeType: "multipart/form-data",
       params: { 'fileName': filename },
       httpMethod: 'POST'
-
     };
 
     const fileTransfer: FileTransferObject = this.fileTransfer.create();
