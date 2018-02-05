@@ -15,6 +15,7 @@ import { ContactPage } from '../pages/contact/contact';
 import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import { MyApp } from './app.component';
+import { DataLoaderProvider } from '../providers/data-loader/data-loader';
 
 
 @NgModule({
@@ -46,7 +47,8 @@ import { MyApp } from './app.component';
     Transfer,
     Camera,
     FilePath,
-    {provide: ErrorHandler, useClass: IonicErrorHandler}
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    DataLoaderProvider
   ]
 })
 export class AppModule {}

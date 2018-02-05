@@ -27,26 +27,6 @@ export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve
  * Use of .json just for practice and able to store in local file.json / compatibility.
  */
 
-//  Could probably have separate class to represent photo data behaviour, but so many useful utility
-// functions can be used regardless.
-/**
- * @param id? a
- * @param title
- * @param description?
- * @param photo?
- * @param timestampCreated
- *
- * @interface PhotoPost
- */
-interface PhotoPost {
-  id?,
-  title: string,
-  description?: string,
-  photo?: any            // test URI or base64 for icon and then expand to full image
-  timestampCreated: Date,
-}
-
-
 
 /**
  *
@@ -62,6 +42,7 @@ export class HomePage {
   lastImage: string = null; // - FIXME: MyPhoto
   loading: Loading;
   cameraActionSheet: ActionSheet
+
   constructor(public navCtrl: NavController,
     public camera: Camera,
     public file: File, public filePath: FilePath,
@@ -73,13 +54,15 @@ export class HomePage {
   ) {
     //
 
-    this.presentToast("Hello");
+    this.presentToast("HomePage:: Constructed Hello");
+
     this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
   }
 
   ionViewDidLoad() {
     //
-    this.presentToast("IonViewDIdLoad");
+    console.log("ionViewDidLoad::");
+    this.debugTestLogToastToastToast("ionViewDidLoad::");
     this.platform.ready()
       .then(platformReadySource => {
         console.log("READY");
@@ -89,6 +72,7 @@ export class HomePage {
       });
 
   }
+
   /**
    *
    *
@@ -116,7 +100,7 @@ export class HomePage {
     }
 
     const camActionSheetOptions: ActionSheetOptions = {
-      title: "Select image  source",
+      title: "Select image source",
       buttons: [
         photoLibraryButton,
         photoCameraButton,
@@ -135,11 +119,9 @@ export class HomePage {
    * @memberof HomePage
    */
   prepareCameraActionSheet( camera: Camera, actionSheetCtrl: ActionSheetController) {
-    this.presentToast("Hello2");
-
-    this.debugTestLogToastToastToast("opt");
+    this.debugTestLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
-    this.debugTestLogToastToastToast("create");
+    this.debugTestLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
     const camActionSheet: ActionSheet = this.actionSheetCtrl.create(camActionSheetOptions);
 
     // modifies the page's actionsheet; // impure function
@@ -187,11 +169,25 @@ export class HomePage {
       });
 
   }
+  /**
+   * Debug wrapper for logging and control flow.
+   *
+   * @param {string} string
+   * @returns {boolean} IsEnabled
+   * @memberof HomePage
+   */
+  debugTestLogToastToastToast(string: string): boolean {
+    // - TODO: Utility class 'global' provider for debug wrapper.
+    const debugFlagIsEnabled: boolean = true;
 
-  debugTestLogToastToastToast(string: string) {
-    console.log("dtlttt::", string);
-    this.presentToast(string);
+    if (debugFlagIsEnabled) {
+      console.log("dtlttt::", string);
+      this.presentToast(string);
+    }
+    return debugFlagIsEnabled;
   }
+
+
   presentToast(text) {
     const toast: Toast = this.toastCtrl.create({
       message: text,
