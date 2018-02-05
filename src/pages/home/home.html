@@ -7,8 +7,8 @@
 </ion-header>
 
 <ion-content padding>
-  <img src="{{pathForImage(lastImage)}}" style="width: 100%" [hidden]="lastImage === null">
-  <h3 [hidden]="lastImage !== null">Please Select Image!</h3>
+  <img src="{{currentPhotoPost.getFilePath()}}" style="width: 100%" [hidden]="currentPhotoPost === null">
+  <h3 [hidden]="currentPhotoPost !== null">Please Select Image!</h3>
 </ion-content>
 
 <ion-footer>
@@ -17,7 +17,7 @@
       <button ion-button icon-left (click)="presentActionSheet()">
         <ion-icon name="camera"></ion-icon>Select Image
       </button>
-      <button ion-button icon-left (click)="uploadImage()" [disabled]="lastImage === null">
+      <button ion-button icon-left (click)="uploadImage()" [disabled]="currentPhotoPost === null">
         <ion-icon name="cloud-upload"></ion-icon>Upload
       </button>
     </ion-buttons>

@@ -16,6 +16,7 @@ import { HomePage } from '../pages/home/home';
 import { TabsPage } from '../pages/tabs/tabs';
 import { MyApp } from './app.component';
 import { DataLoaderProvider } from '../providers/data-loader/data-loader';
+import { PhotoServerHandlerProvider } from '../providers/photo-server-handler/photo-server-handler';
 
 
 @NgModule({
@@ -48,7 +49,8 @@ import { DataLoaderProvider } from '../providers/data-loader/data-loader';
     Camera,
     FilePath,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    DataLoaderProvider
+    DataLoaderProvider,
+    PhotoServerHandlerProvider
   ]
 })
 export class AppModule {}

@@ -1,8 +1,9 @@
+import { PHOTO_UPLOAD_URL, Phost, PhotoServerHandlerProvider } from './../../providers/photo-server-handler/photo-server-handler';
 import { Component } from '@angular/core';
 import { Camera, CameraOptions } from '@ionic-native/camera';
 import { File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
-import { FileTransfer } from '@ionic-native/file-transfer';
+import { FileTransfer, FileTransferObject, FileUploadOptions } from '@ionic-native/file-transfer';
 import { Transfer } from '@ionic-native/transfer';
 import {
   ActionSheet,
@@ -11,17 +12,13 @@ import {
   ActionSheetOptions,
   Loading,
   LoadingController,
+  LoadingOptions,
   NavController,
   Platform,
   Toast,
   ToastController,
 } from 'ionic-angular';
 
-declare const cordova;
-
-export const SERVER_URL = "http://192.168.0.2/";
-export const PHOTO_UPLOAD_URL = SERVER_URL + "upload.php";
-export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve of photo files.
 
 /* - TODO: Replace inefficient web calls with a library or proper database..
  * Use of .json just for practice and able to store in local file.json / compatibility.
@@ -39,18 +36,21 @@ export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve
   templateUrl: 'home.html'
 })
 export class HomePage {
-  lastImage: string = null; // - FIXME: MyPhoto
-  loading: Loading;
+  currentPhotoPost: Phost = null; // - FIXME: MyPhoto
+  loadingIndicator: Loading;
   cameraActionSheet: ActionSheet
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
-    public file: File, public filePath: FilePath,
-    public actionSheetCtrl: ActionSheetController,
-    public toastCtrl: ToastController,
+    public file: File,
+    public filePath: FilePath,
+    public fileTransfer: FileTransfer,
+    public transfer: Transfer,
     public platform: Platform,
+    public actionSheetCtrl: ActionSheetController,
     public loadingCtrl: LoadingController,
-    public transfer: Transfer, public fileTransfer: FileTransfer
+    public toastCtrl: ToastController,
+    public photoServerHandler: PhotoServerHandlerProvider
   ) {
     //
 
@@ -81,7 +81,7 @@ export class HomePage {
    * @memberof HomePage
    */
   getCameraSheetOptions(camera: Camera): ActionSheetOptions {
-    this.presentToast("Hell1o");
+    this.presentToast("Hello");
 
     // Picture button set up for Camera. test.
     const getPictureButton = (buttonText, sourceType) => {
@@ -118,7 +118,7 @@ export class HomePage {
    * @returns {ActionSheet}
    * @memberof HomePage
    */
-  prepareCameraActionSheet( camera: Camera, actionSheetCtrl: ActionSheetController) {
+  prepareCameraActionSheet(camera: Camera, actionSheetCtrl: ActionSheetController) {
     this.debugTestLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
     this.debugTestLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
@@ -163,10 +163,37 @@ export class HomePage {
     this.camera.getPicture(camOptions)
       .then((imageFilePathURI) => {
         this.debugTestLogToastToastToast(imageFilePathURI);
-        this.filePath.resolveNativePath(imageFilePathURI)
+        const nativePathProm: Promise<string> = this.filePath.resolveNativePath(imageFilePathURI);
+
+        nativePathProm.then((nativePath: string) => {
+          this.debugTestLogToastToastToast(nativePath);
+        });
+
       }, (err) => {
 
       });
+  }
+
+  configureUploadingIndicator(loadingController: LoadingController): Loading {
+    const loadingOptions: LoadingOptions = {
+      content: "Uploading...",
+    };
+
+    const uploadingIndicator: Loading = loadingController.create(loadingOptions);
+    return uploadingIndicator
+  }
+
+
+
+  // click() function
+  uploadImage() {
+    const loadingController = this.loadingCtrl;
+
+
+    const uploadingIndicator: Loading = this.configureUploadingIndicator(loadingController);
+    const uploadingPresentPromise: Promise<any> = uploadingIndicator.present();
+
+    this.photoServerHandler.uploadPicture(this.currentPhotoPost, PHOTO_UPLOAD_URL);
 
   }
   /**
