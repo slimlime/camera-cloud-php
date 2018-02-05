@@ -165,8 +165,8 @@ export class HomePage {
       // Make images more manageable for testing. ~file size~dimensions~.
       targetWidth: 400,
       targetHeight: 600
-    }
-
+    };
+/*
     this.camera.getPicture(camOptions)
       .then((imageFilePathURI) => {
         this.debugTestLogToastToastToast(imageFilePathURI);
@@ -177,6 +177,7 @@ export class HomePage {
 
         // - TODO: Refactor~ separate functinos, let etc. promise chain. for filename var init.
         if (isSpecialAndroidPhotoLibraryPathFlag) {
+          console.log("special android photo lib");
           const imageNativePathProm: Promise<string> = this.filePath.resolveNativePath(imageFilePathURI);
 
           imageNativePathProm
@@ -206,12 +207,34 @@ export class HomePage {
             isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
         }
 
-
-
-
-
       }, (err) => {
         this.debugTestLogToastToastToast("Error while selecting image");
+      });
+
+*/
+    // Get the data of an image
+    this.camera.getPicture(camOptions)
+      .then((imagePath) => {
+        this.currentPhotoPost = new Phost("hello", "heeaa", new Date());
+        console.log("currPhotopost::", this.currentPhotoPost);
+
+        // Special handling for Android library
+        if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
+          this.filePath.resolveNativePath(imagePath)
+            .then(filePath => {
+              const correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
+              const currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
+              this.copyFileToLocalDir(correctPath, currentName, this.currentPhotoPost.getLocalFilePath());
+            });
+        } else {
+          const currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
+          const correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
+          console.log("currentName", currentName, "correctPath", correctPath);
+          console.log("the timestampdate for ph0st", this.currentPhotoPost.timestampCreated.getTime());
+          this.copyFileToLocalDir(correctPath, currentName, this.currentPhotoPost.getLocalFilePath());
+        }
+      }, (err) => {
+        this.presentToast('Error while selecting image.');
       });
   }
 
@@ -229,6 +252,8 @@ export class HomePage {
   copyFileToLocalDir(sourceFilePath: string, currentName: string, newFileName: string) {
     const fileEntryProm = this.file.copyFile(sourceFilePath, currentName,
       cordova.file.dataDirectory, newFileName);
+    console.log("sourceFilePath", sourceFilePath, "currentName", currentName, "cordova data dir", cordova.file.dataDirectory, "newFileName", newFileName);
+    //  source 1517829060393.jpg curr: file:///storage/emulated/0/Android/data/io.ionic.starter/cache/ new: 1517829060710.jpg
     this.debugTestLogToastToastToast("copyFileToLocalDir:: source " + sourceFilePath + " curr: " + currentName + " new: " + newFileName);
     fileEntryProm
       .then( success => {
@@ -281,6 +306,9 @@ export class HomePage {
 
 
   presentActionSheet() {
+    // ActionSheet is destroyed on each use. Need to recreate.
+    this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
+
     this.cameraActionSheet.present();
   }
 

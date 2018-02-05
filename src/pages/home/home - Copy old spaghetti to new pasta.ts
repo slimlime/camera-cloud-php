@@ -131,11 +131,15 @@ export class HomePage {
 
   // Copy the image to a local folder
   private copyFileToLocalDir(sourceFilePath, currentName, newFileName) {
-    this.file.copyFile(sourceFilePath, currentName, cordova.file.dataDirectory, newFileName).then(success => {
-      this.lastImage = newFileName;
-    }, error => {
-      this.presentToast('Error while storing file.');
-    });
+    this.file.copyFile(sourceFilePath, currentName, cordova.file.dataDirectory, newFileName)
+      .then(success => {
+        console.log("old sourceFilePath", sourceFilePath, "currentName", currentName, "cordova data dir", cordova.file.dataDirectory, "newFileName", newFileName);
+        this.lastImage = newFileName;
+        //
+        //old sourceFilePath file:///storage/emulated/0/Android/data/io.ionic.starter/cache/ currentName 1517828903404.jpg cordova data dir file:///data/user/0/io.ionic.starter/files/ newFileName 1517828903725.jpg
+      }, error => {
+        this.presentToast('Error while storing file.');
+      });
   }
 
   private presentToast(text) {

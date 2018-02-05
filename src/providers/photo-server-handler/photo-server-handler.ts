@@ -57,11 +57,12 @@ export class Phost {
     this.timestampCreated = timestampCreated;
   }
 
-  // Get platform-correct path to app data folder for `photos/` folder.
+  // Get platform-correct path to app data folder.
+  // filePath filename based on timestamp + .jpg
   getLocalFilePath(): string {
     const nativeDataPhotosDirectory: string = cordova.file.dataDirectory;
-    const filePath = nativeDataPhotosDirectory + this.file + ".jpg";
-
+    const filePath = nativeDataPhotosDirectory + this.timestampCreated.getTime() + ".jpg";
+    console.log("getLocalFilePath():: native and filepath", nativeDataPhotosDirectory, filePath);
     return filePath;
   }
 }
