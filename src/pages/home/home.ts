@@ -16,14 +16,10 @@ import {
   Platform,
   Toast,
   ToastController,
+  ToastOptions,
 } from 'ionic-angular';
 
 import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
-import {
-  Phost,
-  PHOTO_UPLOAD_URL,
-  PhotoServerHandlerProvider,
-} from './../../providers/photo-server-handler/photo-server-handler';
 
 declare const cordova;
 
@@ -43,9 +39,6 @@ declare const cordova;
   templateUrl: 'home.html'
 })
 export class HomePage {
-  currentPhotoPost: Phost = null; // - FIXME: MyPhoto
-  loadingIndicator: Loading;
-  cameraActionSheet: ActionSheet
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
@@ -56,9 +49,7 @@ export class HomePage {
     public platform: Platform,
     public actionSheetCtrl: ActionSheetController,
     public loadingCtrl: LoadingController,
-    public toastCtrl: ToastController,
-    public dataLoader: DataLoaderProvider,
-    public photoServerHandler: PhotoServerHandlerProvider
+    public toastCtrl: ToastController
   ) {
     //
 
@@ -70,12 +61,12 @@ export class HomePage {
   ionViewDidLoad() {
     //
     console.log("ionViewDidLoad::");
-    this.debugTestLogToastToastToast("ionViewDidLoad::");
+    this.debugLogToastToastToast("ionViewDidLoad::");
     this.platform.ready()
       .then(platformReadySource => {
-        this.debugTestLogToastToastToast("READY");
+        this.debugLogToastToastToast("READY");
       }, error => {
-        this.debugTestLogToastToastToast("PLATFORM READY ERROR" + error.toString());
+        this.debugLogToastToastToast("PLATFORM READY ERROR" + error.toString());
       });
 
   }
@@ -88,24 +79,36 @@ export class HomePage {
    * @memberof HomePage
    */
   getCameraSheetOptions(camera: Camera): ActionSheetOptions {
-    this.presentToast("Hello");
+    this.debugLogToastToastToast("getCameraSheetOptions::");
 
-    // Picture button set up for Camera. test.
-    const getPictureButton = (buttonText, sourceType) => {
-      const button = {
-        text: buttonText,
-        handler: () => { this.takePicture(sourceType) }
-      };
-      return button;
-    }
+    /* Picture button skeleton for button text label and source / destination types.
+       Default image destination type to FILE_URI for ease of file transfer.
+       Dependent on cordova-plugin-camera functionality.
+     */
+    // Messing around with JS/TypeScript to make 'reusable'/'unreadable' code...
+    const getPictureButton =
+      (buttonText: string,
+        sourceType: number,
+        destinationType: number = camera.DestinationType.FILE_URI
+      ) => {
+        const button: ActionSheetButton = {
+          text: buttonText,
+          handler: () => { this.takePicture(sourceType, destinationType) }
+        };
+        return button;
+      }
 
-    const photoLibraryButton: ActionSheetButton = getPictureButton("Load photo from the device library", camera.PictureSourceType.PHOTOLIBRARY);
-    const photoCameraButton: ActionSheetButton = getPictureButton("Capture a photo from the camera", camera.PictureSourceType.CAMERA)
+    // Set up buttons
+    const photoLibraryButton: ActionSheetButton = getPictureButton("Load photo from the device library",
+      camera.PictureSourceType.PHOTOLIBRARY);
+    const photoCameraButton: ActionSheetButton = getPictureButton("Capture a photo from the camera",
+      camera.PictureSourceType.CAMERA)
     const cancelButton: ActionSheetButton = {
       text: "Cancel",
       role: "cancel"
     }
 
+    // Configure the camera ActionSheetOptions with the above buttons.
     const camActionSheetOptions: ActionSheetOptions = {
       title: "Select image source",
       buttons: [
@@ -118,6 +121,7 @@ export class HomePage {
     return camActionSheetOptions;
   }
 
+  // Note: ActionSheet is destroyed on each use. Need to recreate.
   /**
    *
    *
@@ -126,9 +130,9 @@ export class HomePage {
    * @memberof HomePage
    */
   prepareCameraActionSheet(camera: Camera, actionSheetCtrl: ActionSheetController) {
-    this.debugTestLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
+    this.debugLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
-    this.debugTestLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
+    this.debugLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
     const camActionSheet: ActionSheet = this.actionSheetCtrl.create(camActionSheetOptions);
 
     // modifies the page's actionsheet; // impure function
@@ -138,104 +142,43 @@ export class HomePage {
     return camActionSheet;
   }
 
-  //   export interface ActionSheetOptions {
-  //     title?: string;
-  //     subTitle?: string;
-  //     cssClass?: string;
-  //     buttons?: (ActionSheetButton | string)[];
-  //     enableBackdropDismiss?: boolean;
-  // }
-  // export interface ActionSheetButton {
-  //     text?: string;
-  //     role?: string;
-  //     icon?: string;
-  //     cssClass?: string;
-  //     handler?: () => boolean | void;
-  // }
-
-  takePicture(sourceType) {
+  /**
+   * Gets the camera options for the camera. Determines the image and resultant data type.
+   * @param {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
+   * @param {number} destinationType enum value from cordova-plugin-camera URI, base64.
+   * @returns {CameraOptions}
+   * @memberof HomePage
+   */
+  getCameraOptions(sourceType: number, destinationType: number): CameraOptions {
     const camOptions: CameraOptions = {
       quality: 98,
       sourceType: sourceType,
-      saveToPhotoAlbum: false,
+      saveToPhotoAlbum: true,           // - FIXME: debug test
       correctOrientation: true,
-      destinationType: this.camera.DestinationType.FILE_URI,
-      allowEdit: false,
+      destinationType: destinationType,
+      allowEdit: true,                  // - FIXME: debug test
 
-      // Make images more manageable for testing. ~file size~dimensions~.
+      /* Make images more manageable for testing. ~ file size /
+          pre-scaled dimensions.
+       */
       targetWidth: 400,
       targetHeight: 600
     };
-/*
-    this.camera.getPicture(camOptions)
-      .then((imageFilePathURI) => {
-        this.debugTestLogToastToastToast(imageFilePathURI);
 
-        // For Android-specific resolution of PHOTOLIBRARY file paths.
-        const isSpecialAndroidPhotoLibraryPathFlag = this.platform.is('android') &&
-          sourceType === this.camera.PictureSourceType.PHOTOLIBRARY;
+    return camOptions;
+  }
 
-        // - TODO: Refactor~ separate functinos, let etc. promise chain. for filename var init.
-        if (isSpecialAndroidPhotoLibraryPathFlag) {
-          console.log("special android photo lib");
-          const imageNativePathProm: Promise<string> = this.filePath.resolveNativePath(imageFilePathURI);
-
-          imageNativePathProm
-            .then((imageNativePath: string) => {
-              const correctPath = imageFilePathURI.substr(0, imageNativePath.lastIndexOf('/') + 1);
-              const currentName = imageFilePathURI.substring(imageNativePath.lastIndexOf('/') + 1, imageNativePath.lastIndexOf('?'));
+  /**
+   *
+   *
+   * @param {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
+   * @param {number} destinationType enum value from cordova-plugin-camera URI, base64.
+   * @memberof HomePage
+   */
+  takePicture(sourceType: number, destinationType: number) {
+    const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
 
 
-              const randoTSFilename = new Date().getTime() + ".jpg";
-              this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
-
-              this.debugTestLogToastToastToast("takePicture:: imageURI, native path, correctPath, currName, platFlag " +
-                imageFilePathURI + " " + imageNativePath + " " + correctPath + " " + currentName + " " +
-                isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
-
-            });
-        } else {
-
-          const correctPath = imageFilePathURI.substr(imageFilePathURI.lastIndexOf('/') + 1);
-          const currentName = imageFilePathURI.substr(0, imageFilePathURI.lastIndexOf('/') + 1);
-
-          const randoTSFilename = new Date().getTime() + ".jpg";
-          this.copyFileToLocalDir(correctPath, currentName, randoTSFilename);
-
-          this.debugTestLogToastToastToast("takePicture:: imageURI, correctPath, currName, platFlag " +
-            imageFilePathURI + " " + correctPath + " " + currentName + " " +
-            isSpecialAndroidPhotoLibraryPathFlag + " " + randoTSFilename);
-        }
-
-      }, (err) => {
-        this.debugTestLogToastToastToast("Error while selecting image");
-      });
-
-*/
-    // Get the data of an image
-    this.camera.getPicture(camOptions)
-      .then((imagePath) => {
-        this.currentPhotoPost = new Phost("hello", "heeaa", new Date());
-        console.log("currPhotopost::", this.currentPhotoPost);
-
-        // Special handling for Android library
-        if (this.platform.is('android') && sourceType === this.camera.PictureSourceType.PHOTOLIBRARY) {
-          this.filePath.resolveNativePath(imagePath)
-            .then(filePath => {
-              const correctPath = filePath.substr(0, filePath.lastIndexOf('/') + 1);
-              const currentName = imagePath.substring(imagePath.lastIndexOf('/') + 1, imagePath.lastIndexOf('?'));
-              this.copyFileToLocalDir(correctPath, currentName, this.currentPhotoPost.getLocalFilePath());
-            });
-        } else {
-          const currentName = imagePath.substr(imagePath.lastIndexOf('/') + 1);
-          const correctPath = imagePath.substr(0, imagePath.lastIndexOf('/') + 1);
-          console.log("currentName", currentName, "correctPath", correctPath);
-          console.log("the timestampdate for ph0st", this.currentPhotoPost.timestampCreated.getTime());
-          this.copyFileToLocalDir(correctPath, currentName, this.currentPhotoPost.getLocalFilePath());
-        }
-      }, (err) => {
-        this.presentToast('Error while selecting image.');
-      });
   }
 
   configureUploadingIndicator(loadingController: LoadingController): Loading {
@@ -244,86 +187,100 @@ export class HomePage {
     };
 
     const uploadingIndicator: Loading = loadingController.create(loadingOptions);
-    return uploadingIndicator
+    return uploadingIndicator;
   }
 
 
-  // should get the filename and timestamp from the created photo post already. - FIXME:
-  copyFileToLocalDir(sourceFilePath: string, currentName: string, newFileName: string) {
-    const fileEntryProm = this.file.copyFile(sourceFilePath, currentName,
-      cordova.file.dataDirectory, newFileName);
-    console.log("sourceFilePath", sourceFilePath, "currentName", currentName, "cordova data dir", cordova.file.dataDirectory, "newFileName", newFileName);
-    //  source 1517829060393.jpg curr: file:///storage/emulated/0/Android/data/io.ionic.starter/cache/ new: 1517829060710.jpg
-    this.debugTestLogToastToastToast("copyFileToLocalDir:: source " + sourceFilePath + " curr: " + currentName + " new: " + newFileName);
-    fileEntryProm
-      .then( success => {
-        const timestampDate: Date = new Date(); // milliseconds timestamp.
-        this.currentPhotoPost = new Phost("TestTitle", "testDescriptionss s", timestampDate);
-      }, error => {
-        this.debugTestLogToastToastToast("Error while storing file to local directory.");
-        console.log(error);
-      });
-  }
 
-  // click() function
-  uploadImage() {
-    const loadingController = this.loadingCtrl;
-
-
-    const uploadingIndicator: Loading = this.configureUploadingIndicator(loadingController);
-    const uploadingPresentPromise: Promise<any> = uploadingIndicator.present();
-
-    this.photoServerHandler.uploadPicture(this.currentPhotoPost, PHOTO_UPLOAD_URL);
-
-  }
   /**
-   * Debug wrapper for logging and control flow.
    *
-   * @param {string} string
-   * @returns {boolean} IsEnabled
+   *
+   * @param {string} debugMessage the main debug message to display.
+   * @param {any} optionalParams additional details or objects to pass to console.log();
+   * @returns {boolean} debugIsEnabled
    * @memberof HomePage
    */
-  debugTestLogToastToastToast(string: string): boolean {
-    // - TODO: Utility class 'global' provider for debug wrapper.
+  debugLogToastToastToast(debugMessage: string, ...optionalParams): boolean {
+    // - TODO: Utility class 'global' provider for debug wrapper utility functions.
     const debugFlagIsEnabled: boolean = true;
 
     if (debugFlagIsEnabled) {
-      console.log("debugTestLogTTT::", string);
-      this.presentToast(string);
+      console.log("dbgLogTTT::", debugMessage, optionalParams);
+      // from message string -> options -> toast -> present(toast)
+      const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(debugMessage);
+      const toast: Toast = this.createToastWithOptions(toastOptions, this.toastCtrl);
+      const toastPromise: Promise<any> = this.presentToast(toast);
+
+      this.presentToast(
+        this.createToastWithOptions(
+          this.getConfiguredToastOptionsWithMessage(debugMessage), this.toastCtrl
+        )
+      )
+        .then(fin => {
+          console.log("fin", fin);
+        });
+
     }
     return debugFlagIsEnabled;
   }
 
+  // - MARK: Toast presentation and preparedness functions...
+  /**
+   * Convenience wrapper function to prepare and present a toast with the given msg using the
+   * ToastController
+   *
+   * @param {string} message
+   * @param {ToastController} toastController
+   * @returns {Promise<any>}
+   * @memberof HomePage
+   */
+  presentPreparedToastWithMessage(message: string, toastController: ToastController): Promise<any> {
+    // Note: Toast is resolved on each use. Need to recreate.
+    const toastedPromise: Promise<any> = this.presentToast(
+      this.createToastWithOptions(
+        this.getConfiguredToastOptionsWithMessage(message), toastController
+      )
+    )
+      .then(fin => {
+        console.log("preparedAndToastedWrapper::", "fin", fin);
+      });
+    return toastedPromise;
+  }
 
-  presentToast(text) {
-    const toast: Toast = this.toastCtrl.create({
-      message: text,
+  presentToast(toastToastToast: Toast): Promise<any> {
+    return toastToastToast.present();
+  }
+
+  createToastWithOptions(toastOptions: ToastOptions, toastController: ToastController) {
+    const toast: Toast = toastController.create(toastOptions);
+    return toast;
+  }
+
+
+  getConfiguredToastOptionsWithMessage(messageText: string): ToastOptions {
+    const toastOptions: ToastOptions = {
+      message: messageText,
       duration: 2500,
       position: "top"
-    });
-    toast.present();
-  }
-
-
-  presentActionSheet() {
-    // ActionSheet is destroyed on each use. Need to recreate.
-    this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
-
-    this.cameraActionSheet.present();
-  }
-
-
-  pathForImage(img: Phost) {
-    if (img === null) {
-      return "";            // used in view as img src.
-    } else {
-      const imageDataPath = this.currentPhotoPost.getLocalFilePath();
-      this.debugTestLogToastToastToast("HP:: pathForImage::" + imageDataPath);
-
-      return imageDataPath;
-      // return cordova.file.dataDirectory + img;
     }
+
+    return toastOptions;
   }
+
+  configureToastWithMessage(messageText: string, toastController: ToastController) {
+    const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(messageText);
+    const toast: Toast = this.createToastWithOptions(toastOptions, toastController);
+  }
+
+
+  presentCreatedToastWithOptions(toastOptions: ToastOptions, toastController: ToastController): Promise<any> {
+    const toast: Toast = this.toastCtrl.create(toastOptions);
+    const toastedPromise: Promise<any> = toast.present();
+    return toastedPromise;
+  }
+
+
+
 
 }
 
