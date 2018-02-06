@@ -129,15 +129,12 @@ export class HomePage {
    * @returns {ActionSheet}
    * @memberof HomePage
    */
-  prepareCameraActionSheet(camera: Camera, actionSheetCtrl: ActionSheetController) {
+  prepareCameraActionSheet(camera: Camera, actionSheetController: ActionSheetController) {
     this.debugLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
-    this.debugLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
-    const camActionSheet: ActionSheet = this.actionSheetCtrl.create(camActionSheetOptions);
 
-    // modifies the page's actionsheet; // impure function
-    // prepares the page actionsheet.
-    this.cameraActionSheet = camActionSheet;
+    this.debugLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
+    const camActionSheet: ActionSheet = actionSheetController.create(camActionSheetOptions);
 
     return camActionSheet;
   }
