@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Camera, CameraOptions } from '@ionic-native/camera';
+import { Camera, CameraOptions, DestinationType, PictureSourceType } from '@ionic-native/camera';
 import { Entry, File } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
@@ -53,7 +53,7 @@ export class HomePage {
   ) {
     //
 
-    this.presentToast("HomePage:: Constructed Hello");
+    this.debugLTTT ("HomePage:: Constructed Hello");
 
     this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
   }
@@ -61,14 +61,62 @@ export class HomePage {
   ionViewDidLoad() {
     //
     console.log("ionViewDidLoad::");
-    this.debugLogToastToastToast("ionViewDidLoad::");
+    this.debugLTTT("ionViewDidLoad::");
     this.platform.ready()
       .then(platformReadySource => {
-        this.debugLogToastToastToast("READY");
+        this.debugLTTT("READY");
       }, error => {
-        this.debugLogToastToastToast("PLATFORM READY ERROR" + error.toString());
+        this.debugLTTT("PLATFORM READY ERROR" + error.toString());
       });
 
+  }
+
+/* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
+  getCameraPictureActionSheetButton(buttonText: string,
+    sourceType: number,
+    destinationType: number,
+    clickFunction: (() => boolean | void)): ActionSheetButton {
+*/
+
+/**
+ * Utility function to prepare the action sheet photo/camera capture buttons.
+ *
+ * @param {string} buttonText
+ * @param {PictureSourceType} sourceType
+ * @param {DestinationType} destinationType
+ * @returns {ActionSheetButton} The picture button to add to the camera action sheet.
+ * @memberof HomePage
+ */
+getCameraPictureActionSheetButton(buttonText: string,
+                                    sourceType: PictureSourceType,
+                                    destinationType: DestinationType): ActionSheetButton {
+    //
+    const clicker = ((a: number, b: number) => {return true});
+    const test = () => {return true};
+
+    // type-safety to make sure it conforms to what the ASButton handler expects.
+    type ButtonHandlerFunction = () => boolean | void;
+
+    const funk: ( () => boolean | void) = ( () => true );
+
+    const funkyFunction: ButtonHandlerFunction = ( () => {
+       ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
+    });
+
+    const capturePhotoFunction = this.takePicture(sourceType, destinationType);
+
+    // Cheating the empty parameter passing defined by {ActionSheetButton.handler} by instead
+    // passing inside the enclosed function.
+    const funkyCapturePhotoFunction: ButtonHandlerFunction = () => {
+      this.debugLTTT("getCameraPictureASButton:: funkyFunction source->dest", sourceType, destinationType);
+      this.takePicture(sourceType, destinationType);
+    };
+    // Hide away the complexity of having function type syntax defined by ActionSheetButton.
+    const pictureASButton: ActionSheetButton = {
+      text: buttonText,
+      handler: funkyCapturePhotoFunction
+    }
+    return pictureASButton;
   }
 
   /**
@@ -79,30 +127,34 @@ export class HomePage {
    * @memberof HomePage
    */
   getCameraSheetOptions(camera: Camera): ActionSheetOptions {
-    this.debugLogToastToastToast("getCameraSheetOptions::");
+    //
+    this.debugLTTT("getCameraSheetOptions::");
 
     /* Picture button skeleton for button text label and source / destination types.
        Default image destination type to FILE_URI for ease of file transfer.
        Dependent on cordova-plugin-camera functionality.
      */
     // Messing around with JS/TypeScript to make 'reusable'/'unreadable' code...
-    const getPictureButton =
-      (buttonText: string,
-        sourceType: number,
-        destinationType: number = camera.DestinationType.FILE_URI
-      ) => {
-        const button: ActionSheetButton = {
-          text: buttonText,
-          handler: () => { this.takePicture(sourceType, destinationType) }
-        };
-        return button;
-      }
+    /*
+        const getPictureButton =
+          (buttonText: string,
+            sourceType: number,
+            destinationType: number = camera.DestinationType.FILE_URI
+          ) => {
+            const button: ActionSheetButton = {
+              text: buttonText,
+              handler: () => { this.takePicture(sourceType, destinationType) }
+            };
+            return button;
+          }
+    */
+
 
     // Set up buttons
-    const photoLibraryButton: ActionSheetButton = getPictureButton("Load photo from the device library",
-      camera.PictureSourceType.PHOTOLIBRARY);
-    const photoCameraButton: ActionSheetButton = getPictureButton("Capture a photo from the camera",
-      camera.PictureSourceType.CAMERA)
+    const photoLibraryButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Load photo from the device library",
+      camera.PictureSourceType.PHOTOLIBRARY, camera.DestinationType.FILE_URI);
+    const photoCameraButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Capture a photo from the camera",
+      camera.PictureSourceType.CAMERA, camera.DestinationType.FILE_URI);
     const cancelButton: ActionSheetButton = {
       text: "Cancel",
       role: "cancel"
@@ -130,10 +182,11 @@ export class HomePage {
    * @memberof HomePage
    */
   prepareCameraActionSheet(camera: Camera, actionSheetController: ActionSheetController) {
-    this.debugLogToastToastToast("prepareCameraActionSheet:: getCameraSheetOptions");
+    //
+    this.debugLTTT("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
 
-    this.debugLogToastToastToast("prepareCameraActionSheet:: ASController.create()");
+    this.debugLTTT("prepareCameraActionSheet:: ASController.create()");
     const camActionSheet: ActionSheet = actionSheetController.create(camActionSheetOptions);
 
     return camActionSheet;
@@ -141,12 +194,13 @@ export class HomePage {
 
   /**
    * Gets the camera options for the camera. Determines the image and resultant data type.
-   * @param {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
-   * @param {number} destinationType enum value from cordova-plugin-camera URI, base64.
+   * @param {PictureSourceType} {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
+   * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
    * @returns {CameraOptions}
    * @memberof HomePage
    */
-  getCameraOptions(sourceType: number, destinationType: number): CameraOptions {
+  getCameraOptions(sourceType: PictureSourceType, destinationType: DestinationType): CameraOptions {
+    //
     const camOptions: CameraOptions = {
       quality: 98,
       sourceType: sourceType,
@@ -168,17 +222,19 @@ export class HomePage {
   /**
    *
    *
-   * @param {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
-   * @param {number} destinationType enum value from cordova-plugin-camera URI, base64.
+   * @param {PictureSourceType} {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
+   * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
    * @memberof HomePage
    */
-  takePicture(sourceType: number, destinationType: number) {
+  takePicture(sourceType: PictureSourceType, destinationType: DestinationType) {
+    //
     const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
 
 
   }
 
   configureUploadingIndicator(loadingController: LoadingController): Loading {
+    //
     const loadingOptions: LoadingOptions = {
       content: "Uploading...",
     };
@@ -190,27 +246,27 @@ export class HomePage {
 
 
   /**
-   *
+   * debugLogToastToastToast(dLTTT) console logs and toasts the given debug details.
    *
    * @param {string} debugMessage the main debug message to display.
    * @param {any} optionalParams additional details or objects to pass to console.log();
    * @returns {boolean} debugIsEnabled
    * @memberof HomePage
    */
-  debugLogToastToastToast(debugMessage: string, ...optionalParams): boolean {
+  debugLTTT(debugMessage: string, ...optionalParams): boolean {
     // - TODO: Utility class 'global' provider for debug wrapper utility functions.
     const debugFlagIsEnabled: boolean = true;
 
     if (debugFlagIsEnabled) {
       console.log("dbgLogTTT::", debugMessage, optionalParams);
       // from message string -> options -> toast -> present(toast)
-      const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(debugMessage);
+      const toastOptions: ToastOptions = this.getConfiguredToastOptionsFromMessage(debugMessage);
       const toast: Toast = this.createToastWithOptions(toastOptions, this.toastCtrl);
       const toastPromise: Promise<any> = this.presentToast(toast);
 
       this.presentToast(
         this.createToastWithOptions(
-          this.getConfiguredToastOptionsWithMessage(debugMessage), this.toastCtrl
+          this.getConfiguredToastOptionsFromMessage(debugMessage), this.toastCtrl
         )
       )
         .then(fin => {
@@ -231,11 +287,11 @@ export class HomePage {
    * @returns {Promise<any>}
    * @memberof HomePage
    */
-  presentPreparedToastWithMessage(message: string, toastController: ToastController): Promise<any> {
+  presentPreparedToastFromMessage(message: string, toastController: ToastController): Promise<any> {
     // Note: Toast is resolved on each use. Need to recreate.
     const toastedPromise: Promise<any> = this.presentToast(
       this.createToastWithOptions(
-        this.getConfiguredToastOptionsWithMessage(message), toastController
+        this.getConfiguredToastOptionsFromMessage(message), toastController
       )
     )
       .then(fin => {
@@ -245,7 +301,8 @@ export class HomePage {
   }
 
   presentToast(toastToastToast: Toast): Promise<any> {
-    return toastToastToast.present();
+    const toastedPromise: Promise<any> = toastToastToast.present();
+    return toastedPromise;
   }
 
   createToastWithOptions(toastOptions: ToastOptions, toastController: ToastController) {
@@ -254,7 +311,8 @@ export class HomePage {
   }
 
 
-  getConfiguredToastOptionsWithMessage(messageText: string): ToastOptions {
+  getConfiguredToastOptionsFromMessage(messageText: string): ToastOptions {
+    //
     const toastOptions: ToastOptions = {
       message: messageText,
       duration: 2500,
@@ -264,13 +322,16 @@ export class HomePage {
     return toastOptions;
   }
 
-  configureToastWithMessage(messageText: string, toastController: ToastController) {
-    const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(messageText);
-    const toast: Toast = this.createToastWithOptions(toastOptions, toastController);
-  }
+  // configureToastWithMessage(messageText: string, toastController: ToastController) {
+  //   //
+  //   const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(messageText);
+  //   const toast: Toast = this.createToastWithOptions(toastOptions, toastController);
+
+  // }
 
 
   presentCreatedToastWithOptions(toastOptions: ToastOptions, toastController: ToastController): Promise<any> {
+    //
     const toast: Toast = this.toastCtrl.create(toastOptions);
     const toastedPromise: Promise<any> = toast.present();
     return toastedPromise;
