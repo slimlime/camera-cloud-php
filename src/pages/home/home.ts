@@ -231,14 +231,19 @@ getCameraPictureActionSheetButton(buttonText: string,
    * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
    * @memberof HomePage
    */
-  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera) {
+  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera,
+    photoCaptureCompletionHandler: () => boolean) {
     //
     const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
 
     cameraController.getPicture(camOptions)
       .then((imagePath: string) => {
         //
+
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
+        this.copySourceFileToLocalDirectory(correctPath, currentName, "myNewFile",
+          () => { console.log("copyFileToLocalDir completion"); return true; }
+        );
 
       });
 
@@ -255,18 +260,28 @@ getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
     //
 
     // Locate the end of the folder structure chars in path e.g. `dir'/'` in '~/path/to/dir/filename.jpg'
-    const trailingDirSymbolIndex = imagePath.lastIndexOf('/');
+    const trailingDirSymbolFolderNestedEndIndex = imagePath.lastIndexOf('/');
     // Get the filename index e.g. slice substr at first char 'f' in 'filename.jpg'
-    const fileNameStartIndex = trailingDirSymbolIndex + 1;
+    const fileNameStartIndex = trailingDirSymbolFolderNestedEndIndex + 1;
 
     // File name and file path.
     const currentName = imagePath.substr(fileNameStartIndex);
-    const correctPath = imagePath.substr(0, fileNameStartIndex)
+    const correctPath = imagePath.substr(0, fileNameStartIndex);
 
-    return [currentName, correctPath]
+    return [currentName, correctPath];
   }
 
-  copyFileToLocalDirectory(sourceFilePath: string, sourceFileName, newFileName, completionHandler: () => boolean) {
+  /**
+   *
+   *
+   * @param {string} sourceFilePath
+   * @param {any} sourceFileName
+   * @param {any} newFileName
+   * @param {() => boolean} completionHandler Function to activate e.g. UI presentation on promise resolution of
+   * async file functions.
+   * @memberof HomePage
+   */
+  copySourceFileToLocalDirectory(sourceFilePath: string, sourceFileName, newFileName, completionHandler: () => boolean) {
 
 
   }
