@@ -282,7 +282,8 @@ getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
    * @memberof HomePage
    */
   copySourceFileToLocalDirectory(sourceFilePath: string, sourceFileName, newFileName, completionHandler: () => boolean) {
-
+    // Warning: Completion handlers are more imperative. Can convert
+    // to 'Functional' style easily using return Promises
 
   }
 
