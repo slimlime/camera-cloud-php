@@ -78,6 +78,11 @@ export class HomePage {
     clickFunction: (() => boolean | void)): ActionSheetButton {
 */
 
+
+// - MARK: - UI component presentation and utility functions
+
+// - MARK: ActionSheet setup functions.
+
 /**
  * Utility function to prepare the action sheet photo/camera capture buttons.
  *
@@ -91,18 +96,17 @@ getCameraPictureActionSheetButton(buttonText: string,
                                     sourceType: PictureSourceType,
                                     destinationType: DestinationType): ActionSheetButton {
     //
-    const clicker = ((a: number, b: number) => {return true});
-    const test = () => {return true};
-
     // type-safety to make sure it conforms to what the ASButton handler expects.
     type ButtonHandlerFunction = () => boolean | void;
 
-    const funk: ( () => boolean | void) = ( () => true );
-
-    const funkyFunction: ButtonHandlerFunction = ( () => {
-       ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
-    });
-
+    /* Even more funky stuff.. ignore.
+      const clicker = ((a: number, b: number) => {return true});
+      const test = () => {return true};
+      const funk: ( () => boolean | void) = ( () => true );
+      const funkyFunction: ButtonHandlerFunction = ( () => {
+        ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
+      });
+    */
     const capturePhotoFunction = this.takePicture(sourceType, destinationType);
 
     // Cheating the empty parameter passing defined by {ActionSheetButton.handler} by instead
@@ -120,7 +124,7 @@ getCameraPictureActionSheetButton(buttonText: string,
   }
 
   /**
-   *
+   * Sets up the photo capture ActionSheetOptions for camera
    *
    * @param {Camera} camera
    * @returns {ActionSheetOptions}
@@ -150,11 +154,13 @@ getCameraPictureActionSheetButton(buttonText: string,
     */
 
 
-    // Set up buttons
+    // Set up photoLibrary, Camera and cancel buttons
     const photoLibraryButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Load photo from the device library",
       camera.PictureSourceType.PHOTOLIBRARY, camera.DestinationType.FILE_URI);
+
     const photoCameraButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Capture a photo from the camera",
       camera.PictureSourceType.CAMERA, camera.DestinationType.FILE_URI);
+
     const cancelButton: ActionSheetButton = {
       text: "Cancel",
       role: "cancel"
@@ -186,7 +192,7 @@ getCameraPictureActionSheetButton(buttonText: string,
     this.debugLTTT("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
 
-    this.debugLTTT("prepareCameraActionSheet:: ASController.create()");
+    this.debugLTTT("prepareCameraActionSheet:: ASController.create()", camActionSheetOptions);
     const camActionSheet: ActionSheet = actionSheetController.create(camActionSheetOptions);
 
     return camActionSheet;
@@ -208,10 +214,9 @@ getCameraPictureActionSheetButton(buttonText: string,
       correctOrientation: true,
       destinationType: destinationType,
       allowEdit: true,                  // - FIXME: debug test
-
       /* Make images more manageable for testing. ~ file size /
           pre-scaled dimensions.
-       */
+      */
       targetWidth: 400,
       targetHeight: 600
     };
@@ -226,13 +231,54 @@ getCameraPictureActionSheetButton(buttonText: string,
    * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
    * @memberof HomePage
    */
-  takePicture(sourceType: PictureSourceType, destinationType: DestinationType) {
+  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera) {
     //
     const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
+
+    cameraController.getPicture(camOptions)
+      .then((imagePath: string) => {
+        //
+        const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
+
+      });
+
+  }
+
+/**
+ *
+ *
+ * @param {string} imagePath
+ * @returns {[string, string]}
+ * @memberof HomePage
+ */
+getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
+    //
+
+    // Locate the end of the folder structure chars in path e.g. `dir'/'` in '~/path/to/dir/filename.jpg'
+    const trailingDirSymbolIndex = imagePath.lastIndexOf('/');
+    // Get the filename index e.g. slice substr at first char 'f' in 'filename.jpg'
+    const fileNameStartIndex = trailingDirSymbolIndex + 1;
+
+    // File name and file path.
+    const currentName = imagePath.substr(fileNameStartIndex);
+    const correctPath = imagePath.substr(0, fileNameStartIndex)
+
+    return [currentName, correctPath]
+  }
+
+  copyFileToLocalDirectory(sourceFilePath: string, sourceFileName, newFileName, completionHandler: () => boolean) {
 
 
   }
 
+
+  /**
+   * Configures, creates and returns a Loading indicator.
+   *
+   * @param {LoadingController} loadingController
+   * @returns {Loading} indicator ready for UI presentation on object method call.
+   * @memberof HomePage
+   */
   configureUploadingIndicator(loadingController: LoadingController): Loading {
     //
     const loadingOptions: LoadingOptions = {
@@ -263,7 +309,7 @@ getCameraPictureActionSheetButton(buttonText: string,
       const toastOptions: ToastOptions = this.getConfiguredToastOptionsFromMessage(debugMessage);
       const toast: Toast = this.createToastWithOptions(toastOptions, this.toastCtrl);
       const toastPromise: Promise<any> = this.presentToast(toast);
-
+      // - FIXME: Function chaining~ readable or no?
       this.presentToast(
         this.createToastWithOptions(
           this.getConfiguredToastOptionsFromMessage(debugMessage), this.toastCtrl
@@ -272,7 +318,6 @@ getCameraPictureActionSheetButton(buttonText: string,
         .then(fin => {
           console.log("fin", fin);
         });
-
     }
     return debugFlagIsEnabled;
   }
@@ -318,7 +363,6 @@ getCameraPictureActionSheetButton(buttonText: string,
       duration: 2500,
       position: "top"
     }
-
     return toastOptions;
   }
 
