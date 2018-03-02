@@ -39,6 +39,7 @@ declare const cordova;
   templateUrl: 'home.html'
 })
 export class HomePage {
+  currentPhotoPost = null
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
@@ -71,6 +72,10 @@ export class HomePage {
 
   }
 
+  presentActionSheet() {
+    const sheet = this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl)
+    sheet.present();
+  }
 /* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
   getCameraPictureActionSheetButton(buttonText: string,
     sourceType: number,
@@ -93,8 +98,9 @@ export class HomePage {
  * @memberof HomePage
  */
 getCameraPictureActionSheetButton(buttonText: string,
-                                    sourceType: PictureSourceType,
-                                    destinationType: DestinationType): ActionSheetButton {
+                                  sourceType: PictureSourceType,
+                                  destinationType: DestinationType,
+                                  camera: Camera  ): ActionSheetButton {
     //
     // type-safety to make sure it conforms to what the ASButton handler expects.
     type ButtonHandlerFunction = () => boolean | void;
@@ -107,13 +113,13 @@ getCameraPictureActionSheetButton(buttonText: string,
         ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
       });
     */
-    const capturePhotoFunction = this.takePicture(sourceType, destinationType);
+    const capturePhotoFunction = this.takePicture(sourceType, destinationType, camera);
 
     // Cheating the empty parameter passing defined by {ActionSheetButton.handler} by instead
     // passing inside the enclosed function.
     const funkyCapturePhotoFunction: ButtonHandlerFunction = () => {
       this.debugLTTT("getCameraPictureASButton:: funkyFunction source->dest", sourceType, destinationType);
-      this.takePicture(sourceType, destinationType);
+      this.takePicture(sourceType, destinationType, camera);
     };
     // Hide away the complexity of having function type syntax defined by ActionSheetButton.
     const pictureASButton: ActionSheetButton = {
@@ -124,7 +130,7 @@ getCameraPictureActionSheetButton(buttonText: string,
   }
 
   /**
-   * Sets up the photo capture ActionSheetOptions for camera
+   * Sets up the photo capture ActionSheetOptions for actionsheet
    *
    * @param {Camera} camera
    * @returns {ActionSheetOptions}
@@ -156,10 +162,10 @@ getCameraPictureActionSheetButton(buttonText: string,
 
     // Set up photoLibrary, Camera and cancel buttons
     const photoLibraryButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Load photo from the device library",
-      camera.PictureSourceType.PHOTOLIBRARY, camera.DestinationType.FILE_URI);
+      camera.PictureSourceType.PHOTOLIBRARY, camera.DestinationType.FILE_URI, camera);
 
     const photoCameraButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Capture a photo from the camera",
-      camera.PictureSourceType.CAMERA, camera.DestinationType.FILE_URI);
+      camera.PictureSourceType.CAMERA, camera.DestinationType.FILE_URI, camera);
 
     const cancelButton: ActionSheetButton = {
       text: "Cancel",
@@ -231,9 +237,9 @@ getCameraPictureActionSheetButton(buttonText: string,
    * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
    * @memberof HomePage
    */
-  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera,
-    photoCaptureCompletionHandler: () => boolean) {
-    //
+  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera) {
+    // , photoCaptureCompletionHandler: () => boolean)
+
     const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
 
     cameraController.getPicture(camOptions)
@@ -241,10 +247,14 @@ getCameraPictureActionSheetButton(buttonText: string,
         //
 
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
-        this.copySourceFileToLocalDirectory(correctPath, currentName, "myNewFile",
-          () => { console.log("copyFileToLocalDir completion"); return true; }
-        );
-
+        const osDestinationPath = cordova.file.dataDirectory;
+        const newFileName = "myNewFile";
+        const completionFunc = () => {
+          console.log("copyFileToLocalDir completion");
+          return true;
+        };
+        this.copySourceFileToLocalDirectory(correctPath, currentName,
+                                            osDestinationPath, newFileName, completionFunc);
       });
 
   }
@@ -274,16 +284,27 @@ getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
   /**
    *
    *
-   * @param {string} sourceFilePath
+   * @param {string} osSourceFilePath
    * @param {any} sourceFileName
    * @param {any} newFileName
    * @param {() => boolean} completionHandler Function to activate e.g. UI presentation on promise resolution of
    * async file functions.
    * @memberof HomePage
    */
-  copySourceFileToLocalDirectory(sourceFilePath: string, sourceFileName, newFileName, completionHandler: () => boolean) {
+  copySourceFileToLocalDirectory(osSourceFilePath: string, sourceFileName,
+                                osDestinationFilePath, newFileName,
+                                completionHandler: () => boolean) {
     // Warning: Completion handlers are more imperative. Can convert
     // to 'Functional' style easily using return Promises
+
+    this.debugLTTT("sourcepath", osSourceFilePath, "sourcename", sourceFileName,
+                    "destpath", osDestinationFilePath, "destname", newFileName)
+    const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
+    fileCopy.then(success => {
+      this.debugLTTT("Success storing file to local", success)
+    }, error => {
+      this.debugLTTT("Error while storing file.", error);
+    });
 
   }
 
@@ -398,7 +419,9 @@ getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
   }
 
 
-
+  pass() {
+    this.debugLTTT("Pass")
+  }
 
 }
 
