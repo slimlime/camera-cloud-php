@@ -114,7 +114,10 @@ getCameraPictureActionSheetButton(buttonText: string,
         ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
       });
     */
-    const capturePhotoFunction = this.takePicture(sourceType, destinationType, camera);
+    const capturePhotoFunction = () => { 
+      this.debugLTTT("getCameraPictureASButton:: handlerFunction source->dest", sourceType, destinationType);
+      return this.takePicture(sourceType, destinationType, camera)
+    };
 
     // Cheating the empty parameter passing defined by {ActionSheetButton.handler} by instead
     // passing inside the enclosed function.
@@ -125,7 +128,7 @@ getCameraPictureActionSheetButton(buttonText: string,
     // Hide away the complexity of having function type syntax defined by ActionSheetButton.
     const pictureASButton: ActionSheetButton = {
       text: buttonText,
-      handler: funkyCapturePhotoFunction
+      handler: capturePhotoFunction
     }
     return pictureASButton;
   }
@@ -254,20 +257,36 @@ getCameraPictureActionSheetButton(buttonText: string,
           console.log("copyFileToLocalDir completion");
           return true;
         };
+        this.debugLTTT("takePicturePromisethen correctPath", correctPath, "currentName", currentName, 
+          "osDestinationpath", osDestinationPath, "newFileName", newFileName, "completionFunc", completionFunc);
         this.copySourceFileToLocalDirectory(correctPath, currentName,
                                             osDestinationPath, newFileName, completionFunc);
       });
 
   }
 
+
 /**
- *
- *
- * @param {string} imagePath
- * @returns {[string, string]}
+ * Returns a string jpg filename based on timestamp.
+ * 
+ * @returns {string} 
  * @memberof HomePage
  */
-getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
+createFileName(): string {
+    const datetime = new Date(),
+      timestamp = datetime.getTime(),
+      newFileName = timestamp + ".jpg";
+    return newFileName;
+  }
+
+  /**
+   *
+   *
+   * @param {string} imagePath
+   * @returns {[string, string]}
+   * @memberof HomePage
+   */
+  getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
     //
 
     // Locate the end of the folder structure chars in path e.g. `dir'/'` in '~/path/to/dir/filename.jpg'
