@@ -3,7 +3,7 @@
     <name>cameraCloud</name>
     <description>An awesome Ionic/Cordova app.</description>
     <author email="hi@ionicframework" href="http://ionicframework.com/">Ionic Framework Team</author>
-    <content original-src="index.html" src="http://192.168.0.4:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -90,5 +90,6 @@
     <plugin name="cordova-plugin-file-transfer" spec="^1.7.0" />
     <plugin name="cordova-plugin-filepath" spec="^1.1.0" />
     <plugin name="cordova-plugin-statusbar" spec="^2.4.1" />
+    <engine name="browser" spec="~5.0.3" />
     <engine name="android" spec="~7.0.0" />
 </widget>
