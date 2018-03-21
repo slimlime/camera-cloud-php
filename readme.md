@@ -1,6 +1,8 @@
+# How to install
+
 npm install --save @ionic-native/camera
-npm install --save @ionic-native/file 
-npm install --save @ionic-native/file-path 
+npm install --save @ionic-native/file
+npm install --save @ionic-native/file-path
 npm install --save @ionic-native/transfer
 
 ionic cordova plugin add cordova-plugin-camera --save

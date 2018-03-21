@@ -55,8 +55,9 @@ export class HomePage {
     //
 
     this.debugLTTT ("HomePage:: Constructed Hello");
-
-    this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
+    // console.log("HomePage:: CONSTRUCTED not debugLTTT")
+    // Avoid complex operations in constructor. ***
+    // this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
   }
 
   ionViewDidLoad() {
@@ -119,7 +120,7 @@ getCameraPictureActionSheetButton(buttonText: string,
     // passing inside the enclosed function.
     const funkyCapturePhotoFunction: ButtonHandlerFunction = () => {
       this.debugLTTT("getCameraPictureASButton:: funkyFunction source->dest", sourceType, destinationType);
-      this.takePicture(sourceType, destinationType, camera);
+      // this.takePicture(sourceType, destinationType, camera);
     };
     // Hide away the complexity of having function type syntax defined by ActionSheetButton.
     const pictureASButton: ActionSheetButton = {
@@ -353,7 +354,7 @@ getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
         )
       )
         .then(fin => {
-          console.log("fin", fin);
+          console.log("finToast", fin);
         });
     }
     return debugFlagIsEnabled;
