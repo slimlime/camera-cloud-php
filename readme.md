@@ -76,3 +76,14 @@ https://github.com/ionic-team/ionic-app-scripts/issues/1354 livereload does not 
 fix(live-server): update android platform path #1407
 
 
+# Accessing debug app files
+```
+    adb shell
+    run-as com.your.packagename 
+    cp /data/data/com.your.packagename/
+```
+or
+```
+    adb backup -noapk com.your.packagename
+    dd if=mybackup.ab bs=24 skip=1|openssl zlib -d > mybackup.tar
+```

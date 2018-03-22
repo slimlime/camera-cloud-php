@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Camera, CameraOptions, DestinationType, PictureSourceType } from '@ionic-native/camera';
-import { Entry, File } from '@ionic-native/file';
+import { Entry, File, FileEntry } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { Transfer } from '@ionic-native/transfer';
@@ -199,11 +199,11 @@ getCameraPictureActionSheetButton(buttonText: string,
    */
   prepareCameraActionSheet(camera: Camera, actionSheetController: ActionSheetController) {
     //
-    this.debugLTTT("prepareCameraActionSheet:: getCameraSheetOptions");
     const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
+    this.debugLTTT("prepareCameraActionSheet:: getCameraSheetOptions", camActionSheetOptions);
 
-    this.debugLTTT("prepareCameraActionSheet:: ASController.create()", camActionSheetOptions);
     const camActionSheet: ActionSheet = actionSheetController.create(camActionSheetOptions);
+    this.debugLTTT("prepareCameraActionSheet:: ASController.create()", camActionSheet);
 
     return camActionSheet;
   }
@@ -252,7 +252,7 @@ getCameraPictureActionSheetButton(buttonText: string,
 
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
         const osDestinationPath = cordova.file.dataDirectory;
-        const newFileName = "myNewFile";
+        const newFileName = "myNewFile.jpg";
         const completionFunc = () => {
           console.log("copyFileToLocalDir completion");
           return true;
@@ -268,7 +268,7 @@ getCameraPictureActionSheetButton(buttonText: string,
 
   /**
    * Returns a string jpg filename based on timestamp.
-   * 
+   * Although plugin temporary file cache sems to use a timestamp name anyway and could probably be preserved.
    * @returns {string} 
    * @memberof HomePage
    */
@@ -309,6 +309,7 @@ getCameraPictureActionSheetButton(buttonText: string,
    * @param {any} newFileName
    * @param {() => boolean} completionHandler Function to activate e.g. UI presentation on promise resolution of
    * async file functions.
+   * e.g. (AndroidPhone)... \Android\data\io.ionic.starter\cache
    * @memberof HomePage
    */
   copySourceFileToLocalDirectory(osSourceFilePath: string, sourceFileName,
@@ -320,8 +321,10 @@ getCameraPictureActionSheetButton(buttonText: string,
     this.debugLTTT("sourcepath", osSourceFilePath, "sourcename", sourceFileName,
                     "destpath", osDestinationFilePath, "destname", newFileName);
     const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
-    fileCopy.then(success => {
-      this.debugLTTT("Success storing file to local", success);
+    fileCopy.then((success: FileEntry) => {
+      this.debugLTTT("Success storing file to local", success.fullPath, success.nativeURL);
+
+      // - FIXME: Path error if using gallery image select. source file name gets 2:".Pic.jpg?1521680895333" instead of "1521680895333.jpg"
     }, error => {
       this.debugLTTT("Error while storing file.", error);
     });
