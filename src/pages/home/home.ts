@@ -224,7 +224,7 @@ getCameraPictureActionSheetButton(buttonText: string,
       correctOrientation: true,
       destinationType: destinationType,
       allowEdit: true,                  // - FIXME: debug test
-      /* Make images more manageable for testing. ~ file size /
+      /* - DEBUG TEST Make images more manageable for testing. ~ file size /
           pre-scaled dimensions.
       */
       targetWidth: 400,
@@ -257,22 +257,22 @@ getCameraPictureActionSheetButton(buttonText: string,
           console.log("copyFileToLocalDir completion");
           return true;
         };
-        this.debugLTTT("takePicturePromisethen correctPath", correctPath, "currentName", currentName, 
+        this.debugLTTT("takePicturePromisethen correctPath", correctPath, "currentName", currentName,
           "osDestinationpath", osDestinationPath, "newFileName", newFileName, "completionFunc", completionFunc);
         this.copySourceFileToLocalDirectory(correctPath, currentName,
-                                            osDestinationPath, newFileName, completionFunc);
+          osDestinationPath, newFileName, completionFunc);
       });
 
   }
 
 
-/**
- * Returns a string jpg filename based on timestamp.
- * 
- * @returns {string} 
- * @memberof HomePage
- */
-createFileName(): string {
+  /**
+   * Returns a string jpg filename based on timestamp.
+   * 
+   * @returns {string} 
+   * @memberof HomePage
+   */
+  createFileName(): string {
     const datetime = new Date(),
       timestamp = datetime.getTime(),
       newFileName = timestamp + ".jpg";
@@ -318,10 +318,10 @@ createFileName(): string {
     // to 'Functional' style easily using return Promises
 
     this.debugLTTT("sourcepath", osSourceFilePath, "sourcename", sourceFileName,
-                    "destpath", osDestinationFilePath, "destname", newFileName)
+                    "destpath", osDestinationFilePath, "destname", newFileName);
     const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
     fileCopy.then(success => {
-      this.debugLTTT("Success storing file to local", success)
+      this.debugLTTT("Success storing file to local", success);
     }, error => {
       this.debugLTTT("Error while storing file.", error);
     });

@@ -62,6 +62,17 @@ Windows supports 8.3 filename notation from legacy FAT Progra~1 = Program Files.
 For more information check Windows recognised environment variables (https://docs.microsoft.com/en-us/windows/deployment/usmt/usmt-recognized-environment-variables)
 SetX defaults to set user variables. -M sets System variables.
 
-
+# Deploying
+ionic cordova run android --device --VERBOSE
+; Note that using livereload or consolelogs options seem to be incompatible with cordova plugins. (cordova_not_available) 
+Thanks to @BritoMatheus and @Sergito for the following fix for live server `-lc` with ionic native, cordova, platform paths.
+***FIX:*** Go to `node_modules//dist/dev-server/serve-config.js` (`.\node_modules\@ionic\app-scripts\dist\dev-server\serve-config.js` **on Windows as of Ionic 3.20, Ionic Native 4.5.3, Cordova 8.0.0**)
+and replace:
+`exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'assets', 'www');`
+to
+`exports.ANDROID_PLATFORM_PATH = path.join('platforms', 'android', 'app', 'src', 'main', 'assets', 'www');`
+[(https://stackoverflow.com/a/48266685)]. https://github.com/ionic-team/ionic-app-scripts/issues/467 https://github.com/ionic-team/ionic/issues/13737
+https://github.com/ionic-team/ionic-app-scripts/issues/1354 livereload does not work with cordova-android 7 #1354
+fix(live-server): update android platform path #1407
 
 

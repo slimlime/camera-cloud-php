@@ -1,0 +1,42 @@
+    1  npm --version
+    2  ls
+    3  cd C:
+    4  cd E;
+    5  cd E:
+    6  ls
+    7  cd _proj
+    8  ls
+    9  mkdir Ionic
+   10  ls
+   11  cd Ionic/
+   12  ionic start helloWorld
+   13  ls
+   14  ionic start
+   15  ionic start helloWorldBlankReal blank
+   16  ionic signup
+   17  ls
+   18  cd helloWorldBlankReal/
+   19  ls
+   20  ionic serve
+   21  ls
+   22  cd ..
+   23  ls
+   24  mkdir MARCH
+   25  ls
+   26  cd MARCH
+   27  git
+   28  git clone https://github.com/slimlime/camera-cloud-php.git
+   29  ls
+   30  cd camera-cloud-php/
+   31  ionic serve
+   32  git status
+   33  git commit -am "refreshed build"
+   34  git push
+   35  ls
+   36  ionic cordova platform add browser android
+   37  ionic cordova platform add browser android
+   38  ionic cordova platform add android
+   39  history -a
+   40  script log.txt
+   41  screen -l
+   42  history > historycmdtest.txt
