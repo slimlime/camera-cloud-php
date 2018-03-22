@@ -85,5 +85,11 @@ fix(live-server): update android platform path #1407
 or
 ```
     adb backup -noapk com.your.packagename
-    dd if=mybackup.ab bs=24 skip=1|openssl zlib -d > mybackup.tar
+    dd if=mybackup.ab bs=24 skip=1 | openssl zlib -d > mybackup.tar
 ```
+or 
+`Android Studio >> View > Tool Windows > Device File Explorer > Expand /data/data/[package-name] nodes`.
+
+typical default debug package name "io.ionic.starter"
+
+Tested using Samsung Galaxy Note 4 SM-N910G running Android 6.0.1, API 23
