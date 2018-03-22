@@ -64,7 +64,8 @@ SetX defaults to set user variables. -M sets System variables.
 
 # Deploying
 ionic cordova run android --device --VERBOSE
-; Note that using livereload or consolelogs options seem to be incompatible with cordova plugins. (cordova_not_available) 
+ionic cordova run android --device --VERBOSE -lc\
+; Note that using livereload or consolelogs options seem to be incompatible with cordova plugins on certain versions of Ionic. (cordova_not_available) 
 Thanks to @BritoMatheus and @Sergito for the following fix for live server `-lc` with ionic native, cordova, platform paths.
 ***FIX:*** Go to `node_modules//dist/dev-server/serve-config.js` (`.\node_modules\@ionic\app-scripts\dist\dev-server\serve-config.js` **on Windows as of Ionic 3.20, Ionic Native 4.5.3, Cordova 8.0.0**)
 and replace:
@@ -77,6 +78,7 @@ fix(live-server): update android platform path #1407
 
 
 # Accessing debug app files
+Using Bash:
 ```
     adb shell
     run-as com.your.packagename 
@@ -85,7 +87,7 @@ fix(live-server): update android platform path #1407
 or
 ```
     adb backup -noapk com.your.packagename
-    dd if=mybackup.ab bs=24 skip=1 | openssl zlib -d > mybackup.tar
+    dd if=backup.ab bs=24 skip=1 | openssl zlib -d > backup.tar
 ```
 or 
 `Android Studio >> View > Tool Windows > Device File Explorer > Expand /data/data/[package-name] nodes`.

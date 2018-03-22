@@ -75,7 +75,8 @@ export class HomePage {
 
   presentActionSheet() {
     const sheet = this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl)
-    sheet.present();
+    const transition: Promise<any> = sheet.present();
+    return transition;
   }
 /* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
   getCameraPictureActionSheetButton(buttonText: string,
@@ -252,7 +253,8 @@ getCameraPictureActionSheetButton(buttonText: string,
 
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
         const osDestinationPath = cordova.file.dataDirectory;
-        const newFileName = "myNewFile.jpg";
+        // const newFileName = "myNewFile.jpg"; // debug test Verified camera capture and copy directory working
+        const newFileName = this.createFileName();
         const completionFunc = () => {
           console.log("copyFileToLocalDir completion");
           return true;
