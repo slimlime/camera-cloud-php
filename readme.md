@@ -75,6 +75,7 @@ to
 [(https://stackoverflow.com/a/48266685)]. https://github.com/ionic-team/ionic-app-scripts/issues/467 https://github.com/ionic-team/ionic/issues/13737
 https://github.com/ionic-team/ionic-app-scripts/issues/1354 livereload does not work with cordova-android 7 #1354
 fix(live-server): update android platform path #1407
+Image in <img>-tag not shown if livereload is enabled #2685
 
 
 # Accessing debug app files

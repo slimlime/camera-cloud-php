@@ -41,7 +41,8 @@ declare const cordova;
   templateUrl: 'home.html'
 })
 export class HomePage {
-  currentPhotoPost = null
+  currentPhotoPost = null;
+  currentPhoto: string = null;
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
@@ -69,6 +70,7 @@ export class HomePage {
     this.platform.ready()
       .then(platformReadySource => {
         this.debugLTTT("READY");
+        this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/myNewFile.jpg";
       }, error => {
         this.debugLTTT("PLATFORM READY ERROR" + error.toString());
       });
@@ -108,6 +110,8 @@ export class HomePage {
     // test 
     console.log("test jsonify");
     this.testCreatePhostAndStringifyRep();
+    this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/1521788900694.jpg";
+    this.debugLTTT(this.currentPhoto);
   }
   
   testCreatePhostAndStringifyRep() {
@@ -140,7 +144,7 @@ export class HomePage {
     const photosDir = "photos";
     fileController.checkDir(this.file.dataDirectory, photosDir)
       .then((dirEntryExists: boolean) => {
-        console.log("Filesystems found", dirEntryExists);
+        console.log("Filesystems found", dirEntryExists, this.file.dataDirectory, cordova.file.dataDirectory);
       }, rejected => {
         console.log("rejected", rejected);
     });
@@ -295,6 +299,7 @@ export class HomePage {
       correctOrientation: true,
       destinationType: destinationType,
       allowEdit: true,                  // - FIXME: debug test
+      encodingType: this.camera.EncodingType.JPEG, 
       /* - DEBUG TEST Make images more manageable for testing. ~ file size /
           pre-scaled dimensions.
       */
@@ -342,6 +347,7 @@ export class HomePage {
             "myDescriptionasdsd lorem ipsum", 
             timestamp, 
             entry.fullPath);
+            
           this.debugLTTT("Selected photopost", this.currentPhotoPost);
         });
       });
