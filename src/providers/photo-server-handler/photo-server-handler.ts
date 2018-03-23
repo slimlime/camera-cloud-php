@@ -80,10 +80,32 @@ export class Phost {
     Phost._idCounter = numPhotos
     return Phost._idCounter;
   }
+/**
+ * Special condition to properly parse the Date object.
+ * 
+ * @static
+ * @returns {Phost} 
+ * @memberof Phost
+ */
+  static jsonParsify(photopostJson: string): Phost {
+    const phost: Phost = JSON.parse(photopostJson);
+    const date: Date = new Date(phost.timestampCreated);
+    phost.timestampCreated = date;
+    return <Phost>phost;
+  }
 
-  testJsonStringify(): string {
+  /**
+   * 
+   * Warning: JSON.stringify for {Date} converts to Date.toISOString.
+   * Doesn't parse back into {Date} format automatically but can create new Date(), passing the ISOString into the constructor;
+   * 
+   * @returns {string} 
+   * @memberof Phost
+   */
+  jsonStringify(): string {
     return JSON.stringify(this);
   }
+
 }
 
 

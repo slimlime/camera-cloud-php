@@ -1,3 +1,4 @@
+
 import { Component } from '@angular/core';
 import { Camera, CameraOptions, DestinationType, PictureSourceType } from '@ionic-native/camera';
 import { DirectoryEntry, Entry, File, FileEntry } from '@ionic-native/file';
@@ -20,7 +21,7 @@ import {
 } from 'ionic-angular';
 
 import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
-
+import { Phost } from './../../providers/photo-server-handler/photo-server-handler';
 
 declare const cordova;
 
@@ -103,8 +104,26 @@ export class HomePage {
     //   });
     // console.log();
     this.setupFileSystem(this.file);
+
+    // test 
+    console.log("test jsonify");
+    this.testCreatePhostAndStringifyRep();
   }
   
+  testCreatePhostAndStringifyRep() {
+    const phostt: Phost = new Phost("lol", "loasdlas", new Date(), "myNewFile.jpg");
+    const phosttstringed = phostt.jsonStringify();
+    console.log("phostt", phostt, "stringed", phosttstringed);
+    
+    const reparsedPhost: Phost = Phost.jsonParsify(phosttstringed);
+    console.log("reparsed", reparsedPhost);
+
+    /* JSON.stringify converts Date to Date.toISOString(). different format that doesnt auto parse.
+      const phosttedparsed: Phost = JSON.parse(phosttstringed);
+      console.log("re-parsed", phosttedparsed);
+      console.log("dated again", new Date(phosttedparsed.timestampCreated));
+    */
+  }
   /**
    * Sets up the file system for photos and data. Checks existing or creates.
    * Could take a list of paths and files to check e.g. photos/ photos.json users.json or just hardcode for now. YAGNI
@@ -112,7 +131,13 @@ export class HomePage {
    */
   setupFileSystem(fileController: File) {
     // returns true, false and can be rejectedpromise? boolean or entry
-    const photosDir = "photos"
+    // Should create an export const of dirs all relative to data directory
+
+    //e.g. app DATADIR = .../files/
+    // app PHOTODIR = DATADIR+/photos/ ?
+    // or just use the ionic/cordova .file.dataDirectory and append any other directories as relative to that.
+
+    const photosDir = "photos";
     fileController.checkDir(this.file.dataDirectory, photosDir)
       .then((dirEntryExists: boolean) => {
         console.log("Filesystems found", dirEntryExists);
@@ -123,6 +148,8 @@ export class HomePage {
     fileController.createDir(this.file.dataDirectory, photosDir, false)
       .then((dirEntry: DirectoryEntry) => { 
         console.log(dirEntry);
+      },(rejectedReason) => {
+        console.log(rejectedReason);    // e.g. on subsequent runs it should reject and return err PATH_EXISTS_ERR code: 12.
       });
       /* e.g. 
        * fullPath url: "/photos/" vs os filesystem url
