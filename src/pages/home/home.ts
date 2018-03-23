@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Camera, CameraOptions, DestinationType, PictureSourceType } from '@ionic-native/camera';
-import { Entry, File, FileEntry } from '@ionic-native/file';
+import { DirectoryEntry, Entry, File, FileEntry } from '@ionic-native/file';
 import { FilePath } from '@ionic-native/file-path';
 import { FileTransfer } from '@ionic-native/file-transfer';
 import { Transfer } from '@ionic-native/transfer';
@@ -20,6 +20,7 @@ import {
 } from 'ionic-angular';
 
 import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
+
 
 declare const cordova;
 
@@ -78,31 +79,73 @@ export class HomePage {
     const transition: Promise<any> = sheet.present();
     return transition;
   }
-/* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
+  /* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
+    getCameraPictureActionSheetButton(buttonText: string,
+      sourceType: number,
+      destinationType: number,
+      clickFunction: (() => boolean | void)): ActionSheetButton {
+  */
+
+  /**
+   * Test functionality on activation
+   * 
+   * @memberof HomePage
+   */
+  doSomething() {
+    // console.log(this.file.dataDirectory);
+    // const photosDirectory = this.file.dataDirectory
+    // this.file.listDir(photosDirectory, "photos")
+    //   .then((entries: Entry[]) => {
+    //     console.log(entries);
+    //   }, (failureReason: any) => {
+    //     // e.g. FileError code: 1 = NOT_FOUND_ERR
+    //     console.log(failureReason)
+    //   });
+    // console.log();
+    this.setupFileSystem(this.file);
+  }
+  
+  /**
+   * Sets up the file system for photos and data. Checks existing or creates.
+   * Could take a list of paths and files to check e.g. photos/ photos.json users.json or just hardcode for now. YAGNI
+   * @memberof HomePage
+   */
+  setupFileSystem(fileController: File) {
+    // returns true, false and can be rejectedpromise? boolean or entry
+    const photosDir = "photos"
+    fileController.checkDir(this.file.dataDirectory, photosDir)
+      .then((dirEntryExists: boolean) => {
+        console.log("Filesystems found", dirEntryExists);
+      }, rejected => {
+        console.log("rejected", rejected);
+    });
+    // ^^ checkdir Don't need to check unless need something inside. createDir will create the directory or replace existing dir.
+    fileController.createDir(this.file.dataDirectory, photosDir, false)
+      .then((dirEntry: DirectoryEntry) => { 
+        console.log(dirEntry);
+      });
+      /* e.g. 
+       * fullPath url: "/photos/" vs os filesystem url
+       * nativeURL:"file:///data/user/0/com.yourpackage.name/files/photos/"
+       */
+  }
+  // - MARK: - UI component presentation and utility functions
+
+  // - MARK: ActionSheet setup functions.
+
+  /**
+   * Utility function to prepare the action sheet photo/camera capture buttons.
+   *
+   * @param {string} buttonText
+   * @param {PictureSourceType} sourceType
+   * @param {DestinationType} destinationType
+   * @returns {ActionSheetButton} The picture button to add to the camera action sheet.
+   * @memberof HomePage
+   */
   getCameraPictureActionSheetButton(buttonText: string,
-    sourceType: number,
-    destinationType: number,
-    clickFunction: (() => boolean | void)): ActionSheetButton {
-*/
-
-
-// - MARK: - UI component presentation and utility functions
-
-// - MARK: ActionSheet setup functions.
-
-/**
- * Utility function to prepare the action sheet photo/camera capture buttons.
- *
- * @param {string} buttonText
- * @param {PictureSourceType} sourceType
- * @param {DestinationType} destinationType
- * @returns {ActionSheetButton} The picture button to add to the camera action sheet.
- * @memberof HomePage
- */
-getCameraPictureActionSheetButton(buttonText: string,
-                                  sourceType: PictureSourceType,
-                                  destinationType: DestinationType,
-                                  camera: Camera  ): ActionSheetButton {
+                                    sourceType: PictureSourceType,
+                                    destinationType: DestinationType,
+                                    camera: Camera): ActionSheetButton {
     //
     // type-safety to make sure it conforms to what the ASButton handler expects.
     type ButtonHandlerFunction = () => boolean | void;
@@ -115,7 +158,7 @@ getCameraPictureActionSheetButton(buttonText: string,
         ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
       });
     */
-    const capturePhotoFunction = () => { 
+    const capturePhotoFunction = () => {
       this.debugLTTT("getCameraPictureASButton:: handlerFunction source->dest", sourceType, destinationType);
       return this.takePicture(sourceType, destinationType, camera)
     };

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FileTransfer, FileTransferObject, FileUploadResult } from '@ionic-native/file-transfer';
 
-
+// - TODO: Focus on local storage first.
 export const SERVER_URL = "http://192.168.0.2/";
 export const PHOTO_UPLOAD_URL = SERVER_URL + "upload.php";
 export const PHOTO_FOLDER_URL = SERVER_URL + "uploads/";  // For simple retrieve of photo files.
@@ -18,10 +18,11 @@ declare const cordova;
  * @interface PhotoPostCollection
  */
 interface PhotoPostCollection {
-  // userID: string,        // one user can have multiple photo collections.
+  // collectorUserID: string,        // one user can have multiple photo collections. each user can own a photo but the photos can be organised into an album collection by another user
   collectionName: string,
   photos: PhotoPost[]
 }
+
 //  Could probably have separate class to represent photo data behaviour, but so many useful utility
 // functions can be used regardless.
 /**
@@ -48,22 +49,40 @@ export class Phost {
   title: string;
   description: string;
   file: string;           // FILE_URI?
-
+  filePath: string;
   timestampCreated: Date;
 
-  constructor(title: string, description = "loret ipsum", timestampCreated: Date) {
+  constructor(title: string, description = "loret ipsum", timestampCreated: Date, file: string) {
     this.id = Phost._idCounter++; // Assign id and increment static class counter.
     this.title = title;
-    this.timestampCreated = timestampCreated;
+    this.timestampCreated = timestampCreated;   // timestamp of the object creation vs the timestamp of photo.?! -- FIXME
+    this.file = file;
   }
 
   // Get platform-correct path to app data folder.
   // filePath filename based on timestamp + .jpg
   getLocalFilePath(): string {
     const nativeDataPhotosDirectory: string = cordova.file.dataDirectory;
-    const filePath = nativeDataPhotosDirectory + this.timestampCreated.getTime() + ".jpg";
+    //const filePath = nativeDataPhotosDirectory + this.timestampCreated.getTime() + ".jpg";
+    const filePath = this.filePath;     // -- FIXME: Cleanup when finalised the file determination operations.
     console.log("getLocalFilePath():: native and filepath", nativeDataPhotosDirectory, filePath);
     return filePath;
+  }
+  /**
+   * Set the static class auto increment counter to the last entry based on number of photos.
+   * See ionic-native File.listDir(path, dirName)
+   * 
+   * @param {number} numPhotos 
+   * @returns {number} 
+   * @memberof Phost
+   */
+  static setPhostCounter(numPhotos: number): number {
+    Phost._idCounter = numPhotos
+    return Phost._idCounter;
+  }
+
+  testJsonStringify(): string {
+    return JSON.stringify(this);
   }
 }
 
