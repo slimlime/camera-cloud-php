@@ -7,5 +7,9 @@
 </ion-header>
 
 <ion-content padding>
-
+  <div class="gallery-button" text-center>
+    <img [src]="imageSrc" />
+    <ion-icon name="images" on-tap="openGallery()"></ion-icon>
+    <p>Choose a Photo</p>
+  </div>
 </ion-content>

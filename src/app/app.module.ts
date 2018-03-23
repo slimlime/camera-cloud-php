@@ -17,6 +17,7 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { DataLoaderProvider } from '../providers/data-loader/data-loader';
 import { PhotoServerHandlerProvider } from '../providers/photo-server-handler/photo-server-handler';
 import { MyApp } from './app.component';
+import { CameraAccessProvider } from '../providers/camera-access/camera-access';
 
 
 @NgModule({
@@ -52,7 +53,8 @@ import { MyApp } from './app.component';
 
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     DataLoaderProvider,
-    PhotoServerHandlerProvider
+    PhotoServerHandlerProvider,
+    CameraAccessProvider
   ]
 })
 export class AppModule {}

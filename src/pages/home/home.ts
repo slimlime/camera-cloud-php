@@ -18,10 +18,12 @@ import {
   Toast,
   ToastController,
   ToastOptions,
+  normalizeURL
 } from 'ionic-angular';
 
 import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
 import { Phost } from './../../providers/photo-server-handler/photo-server-handler';
+import { DomSanitizer } from '@angular/platform-browser';
 
 declare const cordova;
 
@@ -46,6 +48,7 @@ export class HomePage {
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
+    public domSanitizer: DomSanitizer,
     public file: File,
     public filePath: FilePath,
     public fileTransfer: FileTransfer,
@@ -112,6 +115,8 @@ export class HomePage {
     this.testCreatePhostAndStringifyRep();
     this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/1521788900694.jpg";
     this.debugLTTT(this.currentPhoto);
+    this.debugLTTT("normalize", normalizeURL("file:///data/user/0/io.ionic.starter/files/1521788900694.jpg"));
+    this.currentPhoto = normalizeURL("file:///data/user/0/io.ionic.starter/files/1521788900694.jpg");
   }
   
   testCreatePhostAndStringifyRep() {
@@ -142,14 +147,14 @@ export class HomePage {
     // or just use the ionic/cordova .file.dataDirectory and append any other directories as relative to that.
 
     const photosDir = "photos";
-    fileController.checkDir(this.file.dataDirectory, photosDir)
+    fileController.checkDir(cordova.file.dataDirectory, photosDir)
       .then((dirEntryExists: boolean) => {
         console.log("Filesystems found", dirEntryExists, this.file.dataDirectory, cordova.file.dataDirectory);
       }, rejected => {
         console.log("rejected", rejected);
     });
     // ^^ checkdir Don't need to check unless need something inside. createDir will create the directory or replace existing dir.
-    fileController.createDir(this.file.dataDirectory, photosDir, false)
+    fileController.createDir(cordova.file.dataDirectory, photosDir, false)
       .then((dirEntry: DirectoryEntry) => { 
         console.log(dirEntry);
       },(rejectedReason) => {
@@ -327,7 +332,7 @@ export class HomePage {
         //
         // Setup file names
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
-        const osDestinationPath = this.file.dataDirectory + "photos/";   // - TODO: Standardise refactor the fs.
+        const osDestinationPath = cordova.file.dataDirectory + "photos/";   // - TODO: Standardise refactor the fs.
         // const newFileName = "myNewFile.jpg"; // debug test Verified camera capture and copy directory working
         const timestamp: Date = new Date()
         const newFileName = this.createFileNameFromDatetime(timestamp);
@@ -411,7 +416,7 @@ export class HomePage {
     const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
     fileCopy.then((success: FileEntry) => {
       this.debugLTTT("Success storing file to local", success, success.fullPath, success.nativeURL);
-
+      this.debugLTTT("Success now normalize", normalizeURL(success.nativeURL))
       // - FIXME: Path error if using gallery image select. source file name gets 2:".Pic.jpg?1521680895333" instead of "1521680895333.jpg"
       
     }, error => {

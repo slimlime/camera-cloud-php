@@ -76,8 +76,8 @@ to
 https://github.com/ionic-team/ionic-app-scripts/issues/1354 livereload does not work with cordova-android 7 #1354
 fix(live-server): update android platform path #1407
 Image in <img>-tag not shown if livereload is enabled #2685
-
-
+Live reload may not be allowed to load local resources (e.g. *.jpg for img src)
+Normalise img src e.g. file:///data/ into /data/.
 # Accessing debug app files
 Using Bash:
 ```
