@@ -7,14 +7,14 @@
 </ion-header>
 
 <ion-content padding>
-  <img src="{{currentPhoto}}" style="width: 100%">
-
+  <img src="{{currentPhotoPost == null ? '' : currentPhotoPost.filePath}}" style="width: 100%" [hidden]="currentPhotoPost === null">
+  <h3 [hidden]="currentPhotoPost !== null">Please Select Image!</h3>
 </ion-content>
-
+<!-- {{currentPhoto}} -->
 <ion-footer>
   <ion-toolbar color="primary">
     <ion-buttons>
-      <button ion-button icon-left (click)="presentActionSheet()">
+      <button ion-button icon-left (click)="pass()">
         <ion-icon name="camera"></ion-icon>Select Image
       </button>
       <button ion-button icon-left (click)="pass()" [disabled]="currentPhotoPost === null">

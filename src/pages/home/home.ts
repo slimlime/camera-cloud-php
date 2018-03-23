@@ -77,14 +77,15 @@ export class HomePage {
       }, error => {
         this.debugLTTT("PLATFORM READY ERROR" + error.toString());
       });
-
   }
 
+  /*
   presentActionSheet() {
     const sheet = this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl)
     const transition: Promise<any> = sheet.present();
     return transition;
   }
+  */
   /* Cool type definition but not very nice to maintain. Let's hide all of this complexity!
     getCameraPictureActionSheetButton(buttonText: string,
       sourceType: number,
@@ -98,27 +99,12 @@ export class HomePage {
    * @memberof HomePage
    */
   doSomething() {
-    // console.log(this.file.dataDirectory);
-    // const photosDirectory = this.file.dataDirectory
-    // this.file.listDir(photosDirectory, "photos")
-    //   .then((entries: Entry[]) => {
-    //     console.log(entries);
-    //   }, (failureReason: any) => {
-    //     // e.g. FileError code: 1 = NOT_FOUND_ERR
-    //     console.log(failureReason)
-    //   });
-    // console.log();
     this.setupFileSystem(this.file);
-
-    // test 
     console.log("test jsonify");
-    this.testCreatePhostAndStringifyRep();
     this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/1521788900694.jpg";
-    this.debugLTTT(this.currentPhoto);
-    this.debugLTTT("normalize", normalizeURL("file:///data/user/0/io.ionic.starter/files/1521788900694.jpg"));
-    this.currentPhoto = normalizeURL("file:///data/user/0/io.ionic.starter/files/1521788900694.jpg");
   }
   
+
   testCreatePhostAndStringifyRep() {
     const phostt: Phost = new Phost("lol", "loasdlas", new Date(), "myNewFile.jpg");
     const phosttstringed = phostt.jsonStringify();
@@ -165,268 +151,9 @@ export class HomePage {
        * nativeURL:"file:///data/user/0/com.yourpackage.name/files/photos/"
        */
   }
+
   // - MARK: - UI component presentation and utility functions
-
   // - MARK: ActionSheet setup functions.
-
-  /**
-   * Utility function to prepare the action sheet photo/camera capture buttons.
-   *
-   * @param {string} buttonText
-   * @param {PictureSourceType} sourceType
-   * @param {DestinationType} destinationType
-   * @returns {ActionSheetButton} The picture button to add to the camera action sheet.
-   * @memberof HomePage
-   */
-  getCameraPictureActionSheetButton(buttonText: string,
-                                    sourceType: PictureSourceType,
-                                    destinationType: DestinationType,
-                                    camera: Camera): ActionSheetButton {
-    //
-    // type-safety to make sure it conforms to what the ASButton handler expects.
-    type ButtonHandlerFunction = () => boolean | void;
-
-    /* Even more funky stuff.. ignore.
-      const clicker = ((a: number, b: number) => {return true});
-      const test = () => {return true};
-      const funk: ( () => boolean | void) = ( () => true );
-      const funkyFunction: ButtonHandlerFunction = ( () => {
-        ;{;};  // lol ;{;}; ;_; ;;__;; (-(-_(-_-)_-)-)
-      });
-    */
-    const capturePhotoFunction = () => {
-      this.debugLTTT("getCameraPictureASButton:: handlerFunction source->dest", sourceType, destinationType);
-      return this.takePicture(sourceType, destinationType, camera)
-    };
-
-    // Cheating the empty parameter passing defined by {ActionSheetButton.handler} by instead
-    // passing inside the enclosed function.
-    const funkyCapturePhotoFunction: ButtonHandlerFunction = () => {
-      this.debugLTTT("getCameraPictureASButton:: funkyFunction source->dest", sourceType, destinationType);
-      // this.takePicture(sourceType, destinationType, camera);
-    };
-    // Hide away the complexity of having function type syntax defined by ActionSheetButton.
-    const pictureASButton: ActionSheetButton = {
-      text: buttonText,
-      handler: capturePhotoFunction
-    }
-    return pictureASButton;
-  }
-
-  /**
-   * Sets up the photo capture ActionSheetOptions for actionsheet
-   *
-   * @param {Camera} camera
-   * @returns {ActionSheetOptions}
-   * @memberof HomePage
-   */
-  getCameraSheetOptions(camera: Camera): ActionSheetOptions {
-    //
-    this.debugLTTT("getCameraSheetOptions::");
-
-    /* Picture button skeleton for button text label and source / destination types.
-       Default image destination type to FILE_URI for ease of file transfer.
-       Dependent on cordova-plugin-camera functionality.
-     */
-    // Messing around with JS/TypeScript to make 'reusable'/'unreadable' code...
-    /*
-        const getPictureButton =
-          (buttonText: string,
-            sourceType: number,
-            destinationType: number = camera.DestinationType.FILE_URI
-          ) => {
-            const button: ActionSheetButton = {
-              text: buttonText,
-              handler: () => { this.takePicture(sourceType, destinationType) }
-            };
-            return button;
-          }
-    */
-
-
-    // Set up photoLibrary, Camera and cancel buttons
-    const photoLibraryButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Load photo from the device library",
-      camera.PictureSourceType.PHOTOLIBRARY, camera.DestinationType.FILE_URI, camera);
-
-    const photoCameraButton: ActionSheetButton = this.getCameraPictureActionSheetButton("Capture a photo from the camera",
-      camera.PictureSourceType.CAMERA, camera.DestinationType.FILE_URI, camera);
-
-    const cancelButton: ActionSheetButton = {
-      text: "Cancel",
-      role: "cancel"
-    }
-
-    // Configure the camera ActionSheetOptions with the above buttons.
-    const camActionSheetOptions: ActionSheetOptions = {
-      title: "Select image source",
-      buttons: [
-        photoLibraryButton,
-        photoCameraButton,
-        cancelButton
-      ]
-    }
-
-    return camActionSheetOptions;
-  }
-
-  // Note: ActionSheet is destroyed on each use. Need to recreate.
-  /**
-   *
-   *
-   * @param {Camera} camera
-   * @returns {ActionSheet}
-   * @memberof HomePage
-   */
-  prepareCameraActionSheet(camera: Camera, actionSheetController: ActionSheetController) {
-    //
-    const camActionSheetOptions: ActionSheetOptions = this.getCameraSheetOptions(camera);
-    this.debugLTTT("prepareCameraActionSheet:: getCameraSheetOptions", camActionSheetOptions);
-
-    const camActionSheet: ActionSheet = actionSheetController.create(camActionSheetOptions);
-    this.debugLTTT("prepareCameraActionSheet:: ASController.create()", camActionSheet);
-
-    return camActionSheet;
-  }
-
-  /**
-   * Gets the camera options for the camera. Determines the image and resultant data type.
-   * @param {PictureSourceType} {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
-   * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
-   * @returns {CameraOptions}
-   * @memberof HomePage
-   */
-  getCameraOptions(sourceType: PictureSourceType, destinationType: DestinationType): CameraOptions {
-    //
-    const camOptions: CameraOptions = {
-      quality: 98,
-      sourceType: sourceType,
-      saveToPhotoAlbum: true,           // - FIXME: debug test
-      correctOrientation: true,
-      destinationType: destinationType,
-      allowEdit: true,                  // - FIXME: debug test
-      encodingType: this.camera.EncodingType.JPEG, 
-      /* - DEBUG TEST Make images more manageable for testing. ~ file size /
-          pre-scaled dimensions.
-      */
-      targetWidth: 400,
-      targetHeight: 600
-    };
-
-    return camOptions;
-  }
-
-  /**
-   *
-   *
-   * @param {PictureSourceType} {number} sourceType enum value from cordova-plugin-camera Library, Cam, Album.
-   * @param {DestinationType} {number} destinationType enum value from cordova-plugin-camera URI, base64.
-   * @memberof HomePage
-   */
-  takePicture(sourceType: PictureSourceType, destinationType: DestinationType, cameraController: Camera) {
-    // , photoCaptureCompletionHandler: () => boolean)
-
-    const camOptions: CameraOptions = this.getCameraOptions(sourceType, destinationType);
-
-    cameraController.getPicture(camOptions)
-      .then((imagePath: string) => {
-        //
-        // Setup file names
-        const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
-        const osDestinationPath = cordova.file.dataDirectory + "photos/";   // - TODO: Standardise refactor the fs.
-        // const newFileName = "myNewFile.jpg"; // debug test Verified camera capture and copy directory working
-        const timestamp: Date = new Date()
-        const newFileName = this.createFileNameFromDatetime(timestamp);
-        const completionFunc = () => {
-          console.log("copyFileToLocalDir completion");
-          return true;
-        };
-        this.debugLTTT("takePicturePromisethen correctPath", correctPath, "currentName", currentName,
-          "osDestinationpath", osDestinationPath, "newFileName", newFileName, "completionFunc", completionFunc);
-        // Copy to permanent photos directory
-        const localEntryProm: Promise<Entry> = this.copySourceFileToLocalDirectory(correctPath, currentName,
-          osDestinationPath, newFileName, completionFunc);
-
-        // Set the selected photo for display
-        localEntryProm.then((entry: Entry) => { 
-          this.currentPhotoPost = new Phost("NewFile", 
-            "myDescriptionasdsd lorem ipsum", 
-            timestamp, 
-            entry.fullPath);
-            
-          this.debugLTTT("Selected photopost", this.currentPhotoPost);
-        });
-      });
-
-  }
-
-
-  /**
-   * Returns a string jpg filename based on timestamp.
-   * Although plugin temporary file cache sems to use a timestamp name anyway and could probably be preserved.
-   * @returns {string} 
-   * @memberof HomePage
-   */
-  createFileNameFromDatetime(datetime: Date): string {
-    const timestamp = datetime.getTime(),
-          newFileName = timestamp + ".jpg";
-    return newFileName;
-  }
-
-  /**
-   *
-   *
-   * @param {string} imagePath
-   * @returns {[string, string]}
-   * @memberof HomePage
-   */
-  getFileNameAndPathFromCameraFileUri(imagePath: string): [string, string] {
-    //
-
-    // Locate the end of the folder structure chars in path e.g. `dir'/'` in '~/path/to/dir/filename.jpg'
-    const trailingDirSymbolFolderNestedEndIndex = imagePath.lastIndexOf('/');
-    // Get the filename index e.g. slice substr at first char 'f' in 'filename.jpg'
-    const fileNameStartIndex = trailingDirSymbolFolderNestedEndIndex + 1;
-
-    // File name and file path.
-    const currentName = imagePath.substr(fileNameStartIndex);
-    const correctPath = imagePath.substr(0, fileNameStartIndex);
-
-    return [currentName, correctPath];
-  }
-
-  /**
-   *
-   * - TODO: needs cleanup. Returns the promise that resolve to the FileEntry or rejects.
-   * @param {string} osSourceFilePath
-   * @param {any} sourceFileName
-   * @param {any} newFileName
-   * @param {() => boolean} completionHandler Function to activate e.g. UI presentation on promise resolution of
-   * async file functions.
-   * e.g. (AndroidPhone)... \Android\data\io.ionic.starter\cache
-   * @memberof HomePage
-   */
-  copySourceFileToLocalDirectory(osSourceFilePath: string, sourceFileName,
-                                osDestinationFilePath, newFileName,
-                                completionHandler: () => boolean): Promise<Entry> {
-    // Warning: Completion handlers are more imperative. Can convert
-    // to 'Functional' style easily using return Promises
-
-    this.debugLTTT("sourcepath", osSourceFilePath, "sourcename", sourceFileName,
-                    "destpath", osDestinationFilePath, "destname", newFileName);
-    const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
-    fileCopy.then((success: FileEntry) => {
-      this.debugLTTT("Success storing file to local", success, success.fullPath, success.nativeURL);
-      this.debugLTTT("Success now normalize", normalizeURL(success.nativeURL))
-      // - FIXME: Path error if using gallery image select. source file name gets 2:".Pic.jpg?1521680895333" instead of "1521680895333.jpg"
-      
-    }, error => {
-      this.debugLTTT("Error while storing file.", error);
-    });
-
-    return fileCopy;
-  }
-
-
   /**
    * Configures, creates and returns a Loading indicator.
    *
@@ -443,9 +170,6 @@ export class HomePage {
     const uploadingIndicator: Loading = loadingController.create(loadingOptions);
     return uploadingIndicator;
   }
-
-
-
   /**
    * debugLogToastToastToast(dLTTT) console logs and toasts the given debug details.
    *
@@ -476,7 +200,6 @@ export class HomePage {
     }
     return debugFlagIsEnabled;
   }
-
   // - MARK: Toast presentation and preparedness functions...
   /**
    * Convenience wrapper function to prepare and present a toast with the given msg using the
@@ -504,13 +227,10 @@ export class HomePage {
     const toastedPromise: Promise<any> = toastToastToast.present();
     return toastedPromise;
   }
-
   createToastWithOptions(toastOptions: ToastOptions, toastController: ToastController) {
     const toast: Toast = toastController.create(toastOptions);
     return toast;
   }
-
-
   getConfiguredToastOptionsFromMessage(messageText: string): ToastOptions {
     //
     const toastOptions: ToastOptions = {
@@ -520,26 +240,10 @@ export class HomePage {
     }
     return toastOptions;
   }
-
-  // configureToastWithMessage(messageText: string, toastController: ToastController) {
-  //   //
-  //   const toastOptions: ToastOptions = this.getConfiguredToastOptionsWithMessage(messageText);
-  //   const toast: Toast = this.createToastWithOptions(toastOptions, toastController);
-
-  // }
-
-
-  presentCreatedToastWithOptions(toastOptions: ToastOptions, toastController: ToastController): Promise<any> {
-    //
-    const toast: Toast = this.toastCtrl.create(toastOptions);
-    const toastedPromise: Promise<any> = toast.present();
-    return toastedPromise;
-  }
-
-
   pass() {
     this.debugLTTT("Pass")
   }
+
 
 }
 

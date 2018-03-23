@@ -8,7 +8,7 @@ import { NavController } from 'ionic-angular';
 })
 export class AboutPage {
   imageSrc: string;
-  
+
   constructor(public navCtrl: NavController,
     public camera: Camera) {
 
@@ -27,7 +27,11 @@ export class AboutPage {
     }
   
     this.camera.getPicture(cameraOptions)
-      .then(file_uri => this.imageSrc = file_uri, 
+      .then(file_uri => {
+        this.imageSrc = file_uri;
+        console.log(this.imageSrc); // file:///storage/emulated/0/Android/data/io.ionic.starter/cache/IMG_20180323_155959.jpg?1521801512948 works only with livereload disabled.
+        // this.imageSrc = this.imageSrc.replace(/^file:\/\//, ''); // may help in iOS case. unclear in testing.
+      }, 
       err => console.log(err));   
   }
 
