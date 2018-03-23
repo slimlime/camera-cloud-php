@@ -87,7 +87,7 @@ Using Bash:
 ```
 or
 ```
-    adb backup -noapk com.your.packagename
+    adb backup -noapk io.ionic.starter
     dd if=backup.ab bs=24 skip=1 | openssl zlib -d > backup.tar
 ```
 or 
