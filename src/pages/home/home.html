@@ -7,8 +7,13 @@
 </ion-header>
 
 <ion-content padding>
-  <img src="{{currentPhotoPost == null ? '' : currentPhotoPost.filePath}}" style="width: 100%" [hidden]="currentPhotoPost === null">
-  <h3 [hidden]="currentPhotoPost !== null">Please Select Image!</h3>
+  <img src="{{imageSrc == null ? '' : domSanitizer.bypassSecurityTrustHtml(imageSrc)}}" style="width: 100%" [hidden]="imageSrc === null">
+  <h3 [hidden]="imageSrc !== null">Please Select Image!</h3>
+  <div class="gallery-button" text-center>
+    <img [src]="imageSrc" />
+    <ion-icon name="images" on-tap="openGallery()"></ion-icon>
+    <p>Choose a Photo from Gallery</p>
+  </div>
 </ion-content>
 <!-- {{currentPhoto}} -->
 <ion-footer>

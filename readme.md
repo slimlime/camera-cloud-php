@@ -100,3 +100,8 @@ Tested using Samsung Galaxy Note 4 SM-N910G running Android 6.0.1, API 23
 
 Html img src file access is super annoying to work around and doesn't test effectively while using live reload...
 Testing without live reload for a new prototype severely increases development time, for this reason, attempts to use base64 encoded strings for image data rendering for the time being.
+Live reload halves build time.
+
+First attempt at functional programming grew needlessly convoluted with long function chaining and cascade of required parameters.
+
+Security bypasses until a more suitable solution is developed.

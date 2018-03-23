@@ -23,7 +23,7 @@ import {
 
 import { DataLoaderProvider } from '../../providers/data-loader/data-loader';
 import { Phost } from './../../providers/photo-server-handler/photo-server-handler';
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 declare const cordova;
 
@@ -45,6 +45,7 @@ declare const cordova;
 export class HomePage {
   currentPhotoPost = null;
   currentPhoto: string = null;
+  imageSrc: SafeResourceUrl = null;         // safeResourceUrl to comply with xss cors warnings?
 
   constructor(public navCtrl: NavController,
     public camera: Camera,
@@ -58,27 +59,40 @@ export class HomePage {
     public loadingCtrl: LoadingController,
     public toastCtrl: ToastController
   ) {
-    //
-
-    this.debugLTTT ("HomePage:: Constructed Hello");
-    // console.log("HomePage:: CONSTRUCTED not debugLTTT")
+    this.debugLTTT("HomePage:: Constructed Hello");
     // Avoid complex operations in constructor. ***
     // this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl);
   }
 
   ionViewDidLoad() {
-    //
-    console.log("ionViewDidLoad::");
     this.debugLTTT("ionViewDidLoad::");
     this.platform.ready()
       .then(platformReadySource => {
-        this.debugLTTT("READY");
-        this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/myNewFile.jpg";
+        this.debugLTTT("ionViewDidLoad::plat READY");
       }, error => {
-        this.debugLTTT("PLATFORM READY ERROR" + error.toString());
+        this.debugLTTT("ionViewDidLoad::PLATFORM READY ERROR" + error.toString());
       });
   }
 
+  openGallery(): void {
+    const cameraOptions: CameraOptions = {
+        sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+        destinationType: this.camera.DestinationType.DATA_URL,
+        quality: 50,
+        targetWidth: 300,
+        targetHeight: 300,
+        encodingType: this.camera.EncodingType.JPEG,
+        correctOrientation: true,
+        allowEdit: false        
+    };
+    this.camera.getPicture(cameraOptions)
+        .then((data_url: string) => {
+            const base64jpgPrefix = "data:image/png;base64, ";
+            console.log("data URL leadingtrailing", data_url.slice(0, 20), data_url.slice(data_url.length-20));
+            this.imageSrc = this.domSanitizer.bypassSecurityTrustUrl((base64jpgPrefix + data_url));
+            console.log("sanitized", this.imageSrc)
+        });
+  }
   /*
   presentActionSheet() {
     const sheet = this.prepareCameraActionSheet(this.camera, this.actionSheetCtrl)
