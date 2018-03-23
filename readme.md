@@ -1,5 +1,11 @@
 # How to install
 
+Globally
+```
+npm install -g @ionic-angular/schematics
+npm install -g ionic cordova
+```
+
 Platforms
 ```
 cordova platform add browser 
@@ -105,3 +111,17 @@ Live reload halves build time.
 First attempt at functional programming grew needlessly convoluted with long function chaining and cascade of required parameters.
 
 Security bypasses until a more suitable solution is developed.
+
+https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-whitelist/
+
+
+
+Ionic generator currently a stopgap solution... Tedious
+Generate new page #1838
+
+Look at angular Schematics library https://github.com/angular/devkit/tree/master/packages/angular_devkit/schematics
+
+.... inconsistent state deviceready has not fired.
+cordova platform add ios android
+cordova platform remove ios android
+cordova platform add ios android
