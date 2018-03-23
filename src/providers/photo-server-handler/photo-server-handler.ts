@@ -61,13 +61,16 @@ export class Phost {
 
   // Get platform-correct path to app data folder.
   // filePath filename based on timestamp + .jpg
+  /*
   getLocalFilePath(): string {
-    const nativeDataPhotosDirectory: string = cordova.file.dataDirectory;
+    const nativeDataPhotosDirectory: string = cordova.file.dataDirectory + "photos/";
     //const filePath = nativeDataPhotosDirectory + this.timestampCreated.getTime() + ".jpg";
     const filePath = this.filePath;     // -- FIXME: Cleanup when finalised the file determination operations.
     console.log("getLocalFilePath():: native and filepath", nativeDataPhotosDirectory, filePath);
     return filePath;
   }
+  */
+
   /**
    * Set the static class auto increment counter to the last entry based on number of photos.
    * See ionic-native File.listDir(path, dirName)
@@ -126,7 +129,7 @@ export class PhotoServerHandlerProvider {
 
 
   // Simply uploads file path to destination php POST form.
-  uploadPicture(photo: Phost, photoUploadServerUrl: string): Promise<FileUploadResult> {
+  /* uploadPicture(photo: Phost, photoUploadServerUrl: string): Promise<FileUploadResult> {
 
     // Present activity/loading indicator popover.
     // Get FileUploadOptions
@@ -144,7 +147,8 @@ export class PhotoServerHandlerProvider {
     const fileUploadPromise: Promise<FileUploadResult> = fileTransferer.upload(photo.getLocalFilePath(), photoUploadServerUrl, pictureUploadOptions);
 
     return fileUploadPromise; // resolve UI elements on fulfilment of promise in callee.
-  }
+  } 
+  */
 
 
   configurePictureFileUploadOptions(pictureFileName: string): FileUploadOptions {

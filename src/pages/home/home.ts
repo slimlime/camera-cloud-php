@@ -320,19 +320,30 @@ export class HomePage {
     cameraController.getPicture(camOptions)
       .then((imagePath: string) => {
         //
-
+        // Setup file names
         const [currentName, correctPath] = this.getFileNameAndPathFromCameraFileUri(imagePath);
-        const osDestinationPath = cordova.file.dataDirectory;
+        const osDestinationPath = this.file.dataDirectory + "photos/";   // - TODO: Standardise refactor the fs.
         // const newFileName = "myNewFile.jpg"; // debug test Verified camera capture and copy directory working
-        const newFileName = this.createFileName();
+        const timestamp: Date = new Date()
+        const newFileName = this.createFileNameFromDatetime(timestamp);
         const completionFunc = () => {
           console.log("copyFileToLocalDir completion");
           return true;
         };
         this.debugLTTT("takePicturePromisethen correctPath", correctPath, "currentName", currentName,
           "osDestinationpath", osDestinationPath, "newFileName", newFileName, "completionFunc", completionFunc);
-        this.copySourceFileToLocalDirectory(correctPath, currentName,
+        // Copy to permanent photos directory
+        const localEntryProm: Promise<Entry> = this.copySourceFileToLocalDirectory(correctPath, currentName,
           osDestinationPath, newFileName, completionFunc);
+
+        // Set the selected photo for display
+        localEntryProm.then((entry: Entry) => { 
+          this.currentPhotoPost = new Phost("NewFile", 
+            "myDescriptionasdsd lorem ipsum", 
+            timestamp, 
+            entry.fullPath);
+          this.debugLTTT("Selected photopost", this.currentPhotoPost);
+        });
       });
 
   }
@@ -344,10 +355,9 @@ export class HomePage {
    * @returns {string} 
    * @memberof HomePage
    */
-  createFileName(): string {
-    const datetime = new Date(),
-      timestamp = datetime.getTime(),
-      newFileName = timestamp + ".jpg";
+  createFileNameFromDatetime(datetime: Date): string {
+    const timestamp = datetime.getTime(),
+          newFileName = timestamp + ".jpg";
     return newFileName;
   }
 
@@ -375,7 +385,7 @@ export class HomePage {
 
   /**
    *
-   *
+   * - TODO: needs cleanup. Returns the promise that resolve to the FileEntry or rejects.
    * @param {string} osSourceFilePath
    * @param {any} sourceFileName
    * @param {any} newFileName
@@ -386,7 +396,7 @@ export class HomePage {
    */
   copySourceFileToLocalDirectory(osSourceFilePath: string, sourceFileName,
                                 osDestinationFilePath, newFileName,
-                                completionHandler: () => boolean) {
+                                completionHandler: () => boolean): Promise<Entry> {
     // Warning: Completion handlers are more imperative. Can convert
     // to 'Functional' style easily using return Promises
 
@@ -394,13 +404,15 @@ export class HomePage {
                     "destpath", osDestinationFilePath, "destname", newFileName);
     const fileCopy = this.file.copyFile(osSourceFilePath, sourceFileName, osDestinationFilePath, newFileName);
     fileCopy.then((success: FileEntry) => {
-      this.debugLTTT("Success storing file to local", success.fullPath, success.nativeURL);
+      this.debugLTTT("Success storing file to local", success, success.fullPath, success.nativeURL);
 
       // - FIXME: Path error if using gallery image select. source file name gets 2:".Pic.jpg?1521680895333" instead of "1521680895333.jpg"
+      
     }, error => {
       this.debugLTTT("Error while storing file.", error);
     });
 
+    return fileCopy;
   }
 
 
