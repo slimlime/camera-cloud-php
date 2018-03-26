@@ -32,18 +32,32 @@ export class PostDetailPage {
     this.data = this.navParams.get('data') || [];
     this.masterCallback = this.navParams.get('callback');
     this.keys = Object.keys(this.data);
-    const lol = this.data[this.keys[0]];
-    console.log(lol, lol, lol, lol, lol);
+    // this.printOutDataReceived();
     
   }
-
+  printOutDataReceived() {
+    const dataa = this.navParams.get('data') || [];
+    const keyys = Object.keys(dataa);
+    for (let i in keyys) {
+      console.log("PhotopostDetailFound::", keyys[i], dataa[keyys[i]]);
+    }
+  }
   // Submit data and pop back to the previous page.
   submitDetailsToPageCallback() {
     this.masterCallback(this.data)
       .then((res) => {
         console.log(":PostDetail: Submitted details data", this.data, res);
-        this.navCtrl.pop();
       });
+  }
+  submitDetailsAndPop(){
+    this.masterCallback(this.data)
+    .then((res) => {
+      console.log(":PostDetail: Submitted details data", this.data, res); // - FIXME cascade promise return properly.
+    });
+    this.navCtrl.pop();
+  }
+  ionViewDidLeave(){
+    this.submitDetailsToPageCallback();
   }
   pass() {
     console.log("pass");

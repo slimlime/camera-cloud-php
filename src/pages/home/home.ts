@@ -58,7 +58,7 @@ export class HomePage {
             if (updateData == undefined) {
                 reject("Incompatible data to update photo post" + JSON.stringify(updateData));
             }
-            this.data = updateData;
+            this.currentPhotoPost = updateData;
             console.log(":PostDetail callback to Master:", updateData);
             resolve(this.data);                 // Promise resolves to the newly-updated home data
         });
