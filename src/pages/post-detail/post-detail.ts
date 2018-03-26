@@ -35,7 +35,7 @@ export class PostDetailPage {
     this.masterCallback = this.navParams.get('callback');
     this.keys = Object.keys(this.data);
     // this.printOutDataReceived();
-    
+    this.loadSanitisedBase64ImageUrl(this.data.file);
   }
   printOutDataReceived() {
     const dataa = this.navParams.get('data') || [];
