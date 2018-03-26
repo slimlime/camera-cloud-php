@@ -44,7 +44,7 @@ interface PhotoPost {
 }
 
 export class Phost {
-  static _idCounter = 0;  // for auto increment.
+  static _idCounter = 1;  // for auto increment.
   id: number;
   title: string;
   description: string;
@@ -55,6 +55,7 @@ export class Phost {
   constructor(title: string, description = "loret ipsum", timestampCreated: Date, file: string) {
     this.id = Phost._idCounter++; // Assign id and increment static class counter.
     this.title = title;
+    this.description = description;
     this.timestampCreated = timestampCreated;   // timestamp of the object creation vs the timestamp of photo.?! -- FIXME
     this.file = file;
   }
