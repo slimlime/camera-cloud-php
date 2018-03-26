@@ -103,8 +103,10 @@ export class HomePage {
         console.log("Seeded data", this.currentPhotoPost);
     }
     loadPhotoFromB64(data_url: string) {
-        this.currentPhotoPost = new Phost("MyTitle", "LoremIpseums sdfdescription", new Date, data_url);
+        const post = new Phost("MyTitle", "LoremIpseums sdfdescription", new Date, data_url);
         this.loadSanitisedBase64ImageUrl(data_url);
+        this.currentPhotoPost = post;
+        return post;
     }
     /**
      * Test functionality on activation
@@ -139,8 +141,7 @@ export class HomePage {
     selectPhotoFromGallery(): void {
         this.openGallery()
             .then((data_url: string) => {
-                this.loadPhotoFromB64(data_url);
-                
+                this.navToEditPhotoPost(this.loadPhotoFromB64(data_url));
             }, (errorReason: any) => {
                 console.error("Error with photo selection", errorReason);           // error on rejection AND catch?
             })

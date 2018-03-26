@@ -22,6 +22,9 @@
       <ion-label color="primary" floating>{{lol}} </ion-label> <ion-input [(ngModel)]="data[lol]"></ion-input>
     </ion-item>
   </ion-list>
-
+  <div text-center>
+    <img *ngIf="imgSrc" [src]="imgSrc">
+    <p>Choose a Photo from Gallery</p>
+  </div>
 </ion-content>
 

@@ -1,3 +1,4 @@
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Phost } from './../../providers/photo-server-handler/photo-server-handler';
 
 import { Component } from '@angular/core';
@@ -20,7 +21,8 @@ export class PostDetailPage {
   data: Phost;
   masterCallback: DataCallback;
   keys; 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  imgSrc: SafeResourceUrl = null;
+  constructor(public navCtrl: NavController, public navParams: NavParams, public domSanitizer: DomSanitizer) {
 
   }
 
@@ -56,6 +58,12 @@ export class PostDetailPage {
     });
     this.navCtrl.pop();
   }
+  loadSanitisedBase64ImageUrl(data_url: string) {
+    const base64jpgPrefix = "data:image/png;base64, ";
+    console.log("data URL leadingtrailing", data_url.slice(0, 20), data_url.slice(data_url.length - 20));
+    this.imgSrc = this.domSanitizer.bypassSecurityTrustUrl((base64jpgPrefix + data_url));
+    console.log("sanitized", this.imgSrc);
+}
   ionViewDidLeave(){
     this.submitDetailsToPageCallback();
   }
