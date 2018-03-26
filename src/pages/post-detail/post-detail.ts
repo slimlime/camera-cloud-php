@@ -32,6 +32,8 @@ export class PostDetailPage {
     this.data = this.navParams.get('data') || [];
     this.masterCallback = this.navParams.get('callback');
     this.keys = Object.keys(this.data);
+    const lol = this.data[this.keys[0]];
+    console.log(lol, lol, lol, lol, lol);
     
   }
 
