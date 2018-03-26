@@ -1,3 +1,4 @@
+import { PostDetailPage } from './../pages/postdetail/postdetail';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -26,7 +27,8 @@ import { CameraAccessProvider } from '../providers/camera-access/camera-access';
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    PostDetailPage
   ],
   imports: [
     BrowserModule,
@@ -39,7 +41,8 @@ import { CameraAccessProvider } from '../providers/camera-access/camera-access';
     AboutPage,
     ContactPage,
     HomePage,
-    TabsPage
+    TabsPage,
+    PostDetailPage
   ],
   providers: [
     StatusBar,

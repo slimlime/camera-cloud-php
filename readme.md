@@ -121,7 +121,11 @@ Generate new page #1838
 
 Look at angular Schematics library https://github.com/angular/devkit/tree/master/packages/angular_devkit/schematics
 
-.... inconsistent state deviceready has not fired.
+.... inconsistent state deviceready has not fired... Ionic is still buggy!
+```
 cordova platform add ios android
 cordova platform remove ios android
 cordova platform add ios android
+
+ionic cordova plugin add cordova-plugin-statusbar
+```
