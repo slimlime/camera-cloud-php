@@ -18,6 +18,7 @@
   <ion-list >
     <ion-item *ngFor="let lol of keys" (click)="pass()" >
       <!-- <ion-label color="primary" floating>{{lol}} </ion-label> <ion-input value="{{data[lol]}}"></ion-input> -->
+      <!-- Some values should be read-only or hidden. -->
       <ion-label color="primary" floating>{{lol}} </ion-label> <ion-input [(ngModel)]="data[lol]"></ion-input>
     </ion-item>
   </ion-list>
