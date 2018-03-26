@@ -31,7 +31,8 @@ export class PostDetailPage {
   loadDetailsData() {
     this.data = this.navParams.get('data') || [];
     this.masterCallback = this.navParams.get('callback');
-    this.keys = Object.keys(this.data)
+    this.keys = Object.keys(this.data);
+    
   }
 
   // Submit data and pop back to the previous page.

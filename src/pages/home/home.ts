@@ -49,7 +49,7 @@ export type DataCallback = (updatedData: Phost) => Promise<any>;
 })
 export class HomePage {
     currentPhotoPost: Phost = null;
-    currentPhoto: string = null;
+    // currentPhoto: string = null;
     imageSrc: SafeResourceUrl = null;           // safeResourceUrl to comply with xss cors warnings?
 
     data: Phost;
@@ -86,11 +86,13 @@ export class HomePage {
         this.platform.ready()
             .then(platformReadySource => {
                 this.debugLTTT("ionViewDidLoad::plat READY");
+                this.setupFileSystem(this.file);
                 this.seedData();
             }, error => {
                 this.debugLTTT("ionViewDidLoad::PLATFORM READY ERROR" + error.toString());
             });
     }
+
 
     seedData() {
         // Seed image for $5 Meal Deal @ the Unibar brought to you by Griffith SRC, GUPSA. :)
@@ -104,10 +106,20 @@ export class HomePage {
         this.currentPhotoPost = new Phost("MyTitle", "LoremIpseums sdfdescription", new Date, data_url);
         this.loadSanitisedBase64ImageUrl(data_url);
     }
+    /**
+     * Test functionality on activation
+     * 
+     * @memberof HomePage
+     */
+    doSomething() {
+        this.navToEditPhotoPost(this.currentPhotoPost);
+        // console.log("test jsonify");
+        // this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/1521788900694.jpg";
+    }
     // - MARK: Nav
     // Activate nav push after getting the camera data. e.g. resolves.
 
-    editPhotoPost(photoPost: Phost) {
+    navToEditPhotoPost(photoPost: Phost) {
         // Push the photo data and the callback to resolve the edit and nav to the edit page.
         const navParam = { 
             data: photoPost, 
@@ -161,16 +173,7 @@ export class HomePage {
         clickFunction: (() => boolean | void)): ActionSheetButton {
     */
 
-    /**
-     * Test functionality on activation
-     * 
-     * @memberof HomePage
-     */
-    doSomething() {
-        this.setupFileSystem(this.file);
-        console.log("test jsonify");
-        this.currentPhoto = "file:///data/user/0/io.ionic.starter/files/1521788900694.jpg";
-    }
+
 
 
     testCreatePhostAndStringifyRep() {
