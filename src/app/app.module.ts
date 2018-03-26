@@ -1,4 +1,4 @@
-import { PostDetailPage } from './../pages/postdetail/postdetail';
+
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ErrorHandler, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -19,6 +19,7 @@ import { DataLoaderProvider } from '../providers/data-loader/data-loader';
 import { PhotoServerHandlerProvider } from '../providers/photo-server-handler/photo-server-handler';
 import { MyApp } from './app.component';
 import { CameraAccessProvider } from '../providers/camera-access/camera-access';
+import { PostDetailPage } from '../pages/post-detail/post-detail';
 
 
 @NgModule({
